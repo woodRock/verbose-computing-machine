@@ -1,7 +1,7 @@
 import Data.List
 
 triplets :: [Int] -> [[Int]]
-triplets l = nub $ map sort $ map (take 3) $ permutations l
+triplets l = [[l !! a, l !! b, l !! c] | c <- [0 .. length l - 1],b <- [0..c],a <- [0..b]]
 
 check :: [Int] -> Bool
 check t = sum(t) == 2020
