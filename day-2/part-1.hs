@@ -2,10 +2,12 @@ import Data.List.Split
 import Data.List
 import Data.Char
 
+type Password = String
+
 count :: Eq a => a -> [a] -> Int
 count x =  length . filter (==x)
 
-check :: String -> Bool
+check :: Password -> Bool
 check s = c >= min && c <= max
     where
         c = count char password
@@ -16,7 +18,7 @@ check s = c >= min && c <= max
         range = splitOn "-" $ split !! 0
         split = splitOn " " s 
 
-solve :: [String] -> Int
+solve :: [Password] -> Int
 solve = length . filter check
 
 main :: IO () 

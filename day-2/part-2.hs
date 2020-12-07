@@ -2,10 +2,12 @@ import Data.List.Split
 import Data.List
 import Data.Char
 
+type Password = String
+
 count :: Eq a => a -> [a] -> Int
 count x =  length . filter (==x)
 
-check :: String -> Bool
+check :: Password -> Bool
 check s = first || second
     where 
         first = password !! (i1-1) == char && password !! (i2-1) /= char  
@@ -17,7 +19,7 @@ check s = first || second
         range = splitOn "-" $ split !! 0
         split = splitOn " " s 
 
-solve :: [String] -> Int
+solve :: [Password] -> Int
 solve = length . filter check
 
 main :: IO () 

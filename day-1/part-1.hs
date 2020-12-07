@@ -1,9 +1,11 @@
 import Data.List
 
-uniq_pairs :: [Int] -> [(Int,Int)]
+type Pair = (Int, Int)
+
+uniq_pairs :: [Int] -> [Pair]
 uniq_pairs l = nub [(x,y) | x <-l, y<-l, x < y]
 
-check :: (Int,Int) -> Bool
+check :: Pair -> Bool
 check (x,y) = x + y == 2020
 
 solve :: [Int] -> Int

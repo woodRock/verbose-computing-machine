@@ -1,9 +1,11 @@
 import Data.List
 
-triplets :: [Int] -> [[Int]]
+type Triplet = [Int]
+
+triplets :: [Int] -> [Triplet]
 triplets l = [[l !! a, l !! b, l !! c] | c <- [0 .. length l - 1],b <- [0..c],a <- [0..b]]
 
-check :: [Int] -> Bool
+check :: Triplet -> Bool
 check t = sum(t) == 2020
 
 solve :: [Int] -> Int

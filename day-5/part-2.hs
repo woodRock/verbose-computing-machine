@@ -1,6 +1,11 @@
 import Data.List
 
-bs :: String -> [Int] -> (Char, Char) -> Int
+type BinaryCode = String
+type Indexes = [Int]
+type Direction = (Char, Char)
+type SeatId = Int
+
+bs :: BinaryCode -> Indexes -> Direction -> Int
 bs [] i _ = i !! 0
 bs (s:xs) i (l,r) 
     | s == l = bs xs left (l,r) 
@@ -10,13 +15,13 @@ bs (s:xs) i (l,r)
         right = drop mid i
         mid = length i `div` 2
 
-seat_id :: String -> Int
+seat_id :: BinaryCode -> SeatId
 seat_id b = row * 8 + col
     where 
         row = bs (take 7 b) [0..127] ('F','B')
         col = bs (drop 7 b) [0..7] ('L','R')
 
-empty_seat :: [Int] -> Int
+empty_seat :: [SeatId] -> SeatId
 empty_seat [] = 0
 empty_seat [x] = 0
 empty_seat (x:y:xs)
@@ -25,7 +30,7 @@ empty_seat (x:y:xs)
     | otherwise = empty_seat xs
     where next = x + 1
 
-solve :: [String] -> Int 
+solve :: [BinaryCode] -> SeatId 
 solve = empty_seat . sort . map seat_id
 
 main :: IO () 

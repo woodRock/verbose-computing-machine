@@ -4,6 +4,7 @@ import Text.Read
 import Text.Regex.Posix
 
 type KeyValue = (String,String)
+type Passport = String
 
 checkPair :: KeyValue -> Bool
 checkPair ("byr",v) = v =~ "^(19[2-9][0-9]|200[0-2])$" 
@@ -16,7 +17,7 @@ checkPair ("pid",v) = v =~ "^[0-9]{9}$"
 checkPair ("cid",_) = True
 checkPair (_,v) = False
 
-check :: String -> Bool
+check :: Passport -> Bool
 check s = exists && valid && length pairs >= 7
     where
         valid = all (== True) $ map checkPair pairs 
@@ -25,7 +26,7 @@ check s = exists && valid && length pairs >= 7
         exists = s =~ "byr" && s =~"iyr" && s =~ "eyr" && 
                 s =~ "hgt" && s =~ "hcl" && s =~ "ecl" && s =~ "pid"
 
-solve :: [String] -> Int 
+solve :: [Passport] -> Int 
 solve = length . filter check
 
 main :: IO ()
