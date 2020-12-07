@@ -1,3 +1,5 @@
+import Data.List
+
 bs :: String -> [Int] -> (Char, Char) -> Int
 bs [] i _ = i !! 0
 bs (s:xs) i (l,r) 
@@ -14,8 +16,17 @@ seat_id b = row * 8 + col
         row = bs (take 7 b) [0..127] ('F','B')
         col = bs (drop 7 b) [0..7] ('L','R')
 
+empty_seat :: [Int] -> Int
+empty_seat [] = 0
+empty_seat [x] = 0
+empty_seat (x:y:xs)
+    | x == 0 = empty_seat xs
+    | next /= y = next + empty_seat xs
+    | otherwise = empty_seat xs
+    where next = x + 1
+
 solve :: [String] -> Int 
-solve = maximum . map seat_id
+solve = empty_seat . sort . map seat_id
 
 main :: IO () 
 main = interact $ show . solve . lines

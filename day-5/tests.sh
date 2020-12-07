@@ -2,11 +2,16 @@
 
 echo -e "---\nExecuting Tests\n---"
 
-echo "BFFFBBFRRR" | runhaskell part-1.hs
-echo -e "\nExpected: 567\n"
+test () {
+    actual=`echo $1 | runhaskell part-1.hs`
+    expected=$2
+    if [[ $actual == $expected ]]; then
+        echo "Pass!"
+    else
+        echo "Actual: $actual, Expected: $expected"
+    fi
+}
 
-echo "FFFBBBFRRR" | runhaskell part-1.hs
-echo -e "\nExpected: 119\n"
-
-echo "BBFFBBFRLL" | runhaskell part-1.hs
-echo -e "\nExpected: 820\n"
+test "BFFFBBFRRR" "567"
+test "FFFBBBFRRR" "119"
+test "BBFFBBFRLL" "820"
