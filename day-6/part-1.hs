@@ -9,11 +9,8 @@ type Frequency = (Question,Int)
 freq :: Answers -> [Frequency]
 freq s = map (\x -> ([head x], length x)) . group . sort $ s
 
-check :: Group -> Int
-check = length . freq . concat 
-
 solve :: [Group] -> Int 
-solve = sum . map check 
+solve = sum . map (length . freq. concat) 
 
 main :: IO () 
 main = interact $ show . solve . map lines . splitOn "\n\n" 
