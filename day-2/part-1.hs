@@ -12,11 +12,11 @@ check s = c >= min && c <= max
     where
         c = count char password
         password = split !! 2 
-        char = (split !! 1) !! 0
-        min = read $ range !! 0 :: Int
+        char = head (split !! 1)
+        min = read $ head range :: Int 
         max = read $ range !! 1 :: Int
-        range = splitOn "-" $ split !! 0
-        split = splitOn " " s 
+        range = splitOn "-" $ head split
+        split = words  s 
 
 solve :: [Password] -> Int
 solve = length . filter check

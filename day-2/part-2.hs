@@ -13,11 +13,11 @@ check s = first || second
         first = password !! (i1-1) == char && password !! (i2-1) /= char  
         second = password !! (i1-1) /= char && password !! (i2-1) == char  
         password = split !! 2 
-        char = (split !! 1) !! 0
-        i1 = read $ range !! 0 :: Int
+        char = head (split !! 1)
+        i1 = read $ head range
         i2 = read $ range !! 1 :: Int
-        range = splitOn "-" $ split !! 0
-        split = splitOn " " s 
+        range = splitOn "-" $ head split
+        split = words s 
 
 solve :: [Password] -> Int
 solve = length . filter check

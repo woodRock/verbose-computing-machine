@@ -7,7 +7,7 @@ type Group = [Question]
 type Frequency = (Question,Int)
 
 freq :: Answers -> [Frequency]
-freq s = map (\x -> ([head x], length x)) . group . sort $ s
+freq = map (\x -> ([head x], length x)) . group . sort
 
 solve :: [Group] -> Int 
 solve = sum . map (length . freq. concat) 

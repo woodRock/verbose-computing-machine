@@ -6,7 +6,7 @@ type Direction = (Char, Char)
 type SeatId = Int
 
 bs :: BinaryCode -> Indexes -> Direction -> Int
-bs [] i _ = i !! 0
+bs [] i _ = head i 
 bs (s:xs) i (l,r) 
     | s == l = bs xs left (l,r) 
     | otherwise = bs xs right (l,r)
@@ -15,23 +15,23 @@ bs (s:xs) i (l,r)
         right = drop mid i
         mid = length i `div` 2
 
-seat_id :: BinaryCode -> SeatId
-seat_id b = row * 8 + col
+seatId :: BinaryCode -> SeatId
+seatId b = row * 8 + col
     where 
         row = bs (take 7 b) [0..127] ('F','B')
         col = bs (drop 7 b) [0..7] ('L','R')
 
-empty_seat :: [SeatId] -> SeatId
-empty_seat [] = 0
-empty_seat [x] = 0
-empty_seat (x:y:xs)
-    | x == 0 = empty_seat xs
-    | next /= y = next + empty_seat xs
-    | otherwise = empty_seat xs
+emptySeat :: [SeatId] -> SeatId
+emptySeat [] = 0
+emptySeat [x] = 0
+emptySeat (x:y:xs)
+    | x == 0 = emptySeat xs
+    | next /= y = next + emptySeat xs
+    | otherwise = emptySeat xs
     where next = x + 1
 
 solve :: [BinaryCode] -> SeatId 
-solve = empty_seat . sort . map seat_id
+solve = emptySeat . sort . map seatId
 
 main :: IO () 
 main = interact $ show . solve . lines

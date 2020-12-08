@@ -7,7 +7,7 @@ check x y
     | y !! position == '#' = 1
     | otherwise = 0
     where
-        position = slope `mod` (length y)
+        position = slope `mod` length y
         slope = 3 * (length x - 1)
         
 solve :: Course -> Int 

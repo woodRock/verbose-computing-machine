@@ -21,10 +21,9 @@ check :: Passport -> Bool
 check s = exists && valid && length pairs >= 7
     where
         valid = all (== True) $ map checkPair pairs 
-        pairs = map (\x -> (x !! 0, x !! 1)) $ map (splitOn ":") $ splitOn " " formatted
+        pairs = map ((\x -> (x !! 0, x !! 1)) . (splitOn ":")) $ words formatted
         formatted = map (\c -> if c=='\n' then ' ' else c) s
-        exists = s =~ "byr" && s =~"iyr" && s =~ "eyr" && 
-                s =~ "hgt" && s =~ "hcl" && s =~ "ecl" && s =~ "pid"
+        exists = s =~ "byr" && s =~"iyr" && s =~ "eyr" && s =~ "hgt" && s =~ "hcl" && s =~ "ecl" && s =~ "pid"
 
 solve :: [Passport] -> Int 
 solve = length . filter check
