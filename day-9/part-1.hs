@@ -1,17 +1,24 @@
-pairs :: [Int] -> [(Int,Int)]
+type Pair = (Int, Int)
+type Index = Int
+type Sum = Int
+type Preamble = Int
+type Series = [Int]
+type Invalid = Int
+
+pairs :: Series -> [Pair]
 pairs a = [(a !! x, a !! y) | x <- [0..n], y <- [0..n], x < y]
     where n = length a - 1
 
-check :: Int -> [(Int,Int)] -> Bool
+check :: Sum -> [Pair] -> Bool
 check z = any ((== z). uncurry (+)) 
 
-slice :: Int -> Int -> [Int] -> [Int]
+slice :: Index -> Index -> Series -> Series
 slice x y = take (y - x + 1) . drop x
 
-takeLast :: Int -> Int -> [Int] -> [Int]
+takeLast :: Index -> Preamble -> Series -> Series
 takeLast i n = slice (i - n) (i - 1) 
 
-solve :: Int -> [Int] -> Int 
+solve :: Preamble -> Series -> Invalid 
 solve n a = fst $ head $ filter ((== False) . snd) $ 
             map (\i -> (a !! i, check (a !! i) $ pairs $ takeLast i n a)) 
             [n + 1 .. length a - 1] 
