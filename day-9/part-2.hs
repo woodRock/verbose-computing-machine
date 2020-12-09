@@ -1,12 +1,5 @@
 import Data.Maybe
 
-pairs :: [Int] -> [(Int,Int)]
-pairs a = [(a !! x, a !! y) | x <- [0..n], y <- [0..n], x < y]
-    where n = length a - 1
-
-check :: Int -> [(Int,Int)] -> Bool
-check z = any ((== z). uncurry (+)) 
-
 slice :: Int -> Int -> [Int] -> [Int]
 slice x y = take (y - x + 1) . drop x
 
@@ -16,6 +9,13 @@ takeLast i n = slice (i - n) (i - 1)
 contiguous :: [Int] -> [[Int]]
 contiguous a = map (\(x,y) -> slice x y a) [(x,y) | x <- [0..n], y <- [0..n], x < y]
     where n = length a - 1
+
+pairs :: [Int] -> [(Int,Int)]
+pairs a = [(a !! x, a !! y) | x <- [0..n], y <- [0..n], x < y]
+    where n = length a - 1
+
+check :: Int -> [(Int,Int)] -> Bool
+check z = any ((== z). uncurry (+)) 
 
 solve :: Int -> [Int] -> Int 
 solve n a = maximum cs + minimum cs
