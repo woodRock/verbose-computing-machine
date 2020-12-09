@@ -12,7 +12,7 @@ Advent of Code is an Advent calendar of small programming puzzles for a variety 
 - [x] [Day 6](https://github.com/woodRock/verbose-computing-machine/tree/main/day-6)
 - [x] [Day 7](https://github.com/woodRock/verbose-computing-machine/tree/main/day-7)
 - [x] [Day 8](https://github.com/woodRock/verbose-computing-machine/tree/main/day-8)
-- [ ] [Day 9](https://github.com/woodRock/verbose-computing-machine/tree/main/day-9)
+- [x] [Day 9](https://github.com/woodRock/verbose-computing-machine/tree/main/day-9)
 - [ ] [Day 10](https://github.com/woodRock/verbose-computing-machine/tree/main/day-10)
 - [ ] [Day 11](https://github.com/woodRock/verbose-computing-machine/tree/main/day-11)
 - [ ] [Day 12](https://github.com/woodRock/verbose-computing-machine/tree/main/day-12)
