@@ -1,5 +1,3 @@
-import Data.Maybe
-
 slice :: Int -> Int -> [Int] -> [Int]
 slice x y = take (y - x + 1) . drop x
 

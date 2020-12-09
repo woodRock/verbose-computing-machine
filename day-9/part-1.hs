@@ -1,5 +1,3 @@
-import Data.Maybe
-
 pairs :: [Int] -> [(Int,Int)]
 pairs a = [(a !! x, a !! y) | x <- [0..n], y <- [0..n], x < y]
     where n = length a - 1
@@ -21,3 +19,4 @@ solve n a = fst $ head $ filter ((== False) . snd) $
 main :: IO ()
 main = interact $ show . solve n . map read . lines
     where n = 25
+
