@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 import Data.List
 
 type Ship = ((Double, Double), (Double, Double))
