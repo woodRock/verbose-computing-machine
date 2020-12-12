@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 import Data.List
 
-type Ship = ((Integer, Integer), (Integer, Integer))
+type Ship = ((Double, Double), (Double, Double))
 
 step :: Ship -> String -> Ship
 step (spos@(sx, sy), wpos@(wx, wy)) s =
@@ -10,25 +10,20 @@ step (spos@(sx, sy), wpos@(wx, wy)) s =
     'S' : n -> (spos, (wx, wy - read n))
     'E' : n -> (spos, (wx + read n, wy))
     'W' : n -> (spos, (wx - read n, wy))
-    'L' : n -> (spos, rotate wpos (360 - read n))
-    'R' : n -> (spos, rotate wpos (read n))
-    'F' : n ->
-      let ni = read n
-       in ((sx + wx * ni, sy + wy * ni), wpos)
+    'L' : n -> (spos, (wx * cos (a1 n) - wy * sin (a1 n), wx * sin (a1 n) + wy * cos (a1 n)))
+    'R' : n -> (spos, (wx * cos (a2 n) - wy * sin (a2 n), wx * sin (a2 n) + wy * cos (a2 n)))
+    'F' : n -> ((sx + wx * read n, sy + wy * read n), wpos)
   where
-    rotate (x, y) = \case
-      90 -> (y, - x)
-      180 -> (- x, - y)
-      270 -> (- y, x)
+     a1 n = (read n) * 2 * pi / 360
+     a2 n = (360 - read n) * 2 * pi / 360
 
 simulate :: [String] -> Ship
 simulate =
   foldl' step ((0, 0), (10, 1))
 
-solve :: [String] -> Integer
-solve xs =
-  let (x, y) = fst $ simulate xs
-   in abs x + abs y
+solve :: [String] -> Int
+solve xs = round (abs x + abs y)
+   where (x, y) = fst $ simulate xs
 
-main :: IO () 
+main :: IO ()
 main = interact $ show . solve . lines

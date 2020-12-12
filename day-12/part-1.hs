@@ -25,10 +25,7 @@ simulate = foldl step (origin,facing)
         origin = (0,0)
 
 solve :: [String] -> Int
-solve x = round $ manhattan s
-    where
-        (s,d) = simulate x
-        origin = (0,0)
+solve = round . manhattan . fst . simulate
 
 main :: IO ()
 main = interact $ show . solve . lines
