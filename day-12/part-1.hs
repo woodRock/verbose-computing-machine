@@ -26,8 +26,8 @@ step (spos@(sx,sy), wpos@(wx,wy)) s =
     case s of
         'N' : n -> ((sx,sy + read n), wpos)
         'S' : n -> ((sx,sy - read n), wpos)
-        'E' : n -> ((sx - read n,sy), wpos)
-        'W' : n -> ((sx + read n,sy), wpos)
+        'E' : n -> ((sx + read n,sy), wpos)
+        'W' : n -> ((sx - read n,sy), wpos)
         'L' : n -> (spos, rotate wpos (360 - read n))
         'R' : n -> (spos, rotate wpos (read n))
         'F' : n ->
@@ -45,8 +45,8 @@ simulate = foldl step (origin,facing)
         facing = toDirection 'E'
         origin = (0,0)
 
-solve :: [String] -> (Int,Char)
-solve xs = (manhattan s, direction d)
+solve :: [String] -> Int
+solve xs = manhattan s
     where
         (s,d) = simulate xs
         origin = (0,0)
