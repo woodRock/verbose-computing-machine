@@ -1,6 +1,10 @@
 import Data.List
 
+type Point = (Double,Double)
 type Ship = ((Double, Double), (Double, Double))
+
+manhattan :: Point -> Double
+manhattan (x,y) = abs x + abs y
 
 step :: Ship -> String -> Ship
 step (spos@(sx, sy), wpos@(wx, wy)) s =
@@ -17,12 +21,10 @@ step (spos@(sx, sy), wpos@(wx, wy)) s =
      a2 n = (360 - read n) * 2 * pi / 360
 
 simulate :: [String] -> Ship
-simulate =
-  foldl' step ((0, 0), (10, 1))
+simulate = foldl' step ((0, 0), (10, 1))
 
 solve :: [String] -> Int
-solve xs = round (abs x + abs y)
-   where (x, y) = fst $ simulate xs
+solve = round . manhattan . fst . simulate
 
 main :: IO ()
 main = interact $ show . solve . lines
