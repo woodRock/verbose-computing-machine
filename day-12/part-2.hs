@@ -1,7 +1,7 @@
 import Data.List
 
 type Point = (Double,Double)
-type Ship = ((Double, Double), (Double, Double))
+type Ship = (Point, Point)
 
 manhattan :: Point -> Double
 manhattan (x,y) = abs x + abs y
