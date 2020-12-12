@@ -1,54 +1,33 @@
-{-# LANGUAGE LambdaCase #-}
-
 import Data.List
 
-type Point = (Int,Int)
-type Direction = (Int,Int)
-type Ship = (Point,Direction)
+type Point = (Double,Double)
+type Direction = (Double,Double)
+type Ship = (Point,Double)
 
-manhattan :: Point -> Int
+manhattan :: Point -> Double
 manhattan (x,y) = abs x + abs y
 
-toDirection :: Char -> Direction
-toDirection 'N' = (0,1)
-toDirection 'E' = (1,0)
-toDirection 'S' = (0,-1)
-toDirection 'W' = (-1,0)
-
-direction :: Direction -> Char
-direction (0,1)  = 'N'
-direction (1,0)  = 'E'
-direction (0,-1) = 'S'
-direction (-1,0) = 'W'
-
 step :: Ship -> String -> Ship
-step (spos@(sx,sy), wpos@(wx,wy)) s =
+step (spos@(x,y), a) s =
     case s of
-        'N' : n -> ((sx,sy + read n), wpos)
-        'S' : n -> ((sx,sy - read n), wpos)
-        'E' : n -> ((sx + read n,sy), wpos)
-        'W' : n -> ((sx - read n,sy), wpos)
-        'L' : n -> (spos, rotate wpos (360 - read n))
-        'R' : n -> (spos, rotate wpos (read n))
-        'F' : n ->
-            let ni = read n
-            in ((sx + wx * ni, sy + wy * ni), wpos)
-        where
-            rotate (x,y) = \case
-                90 -> (y,-x)
-                180 -> (-x,-y)
-                270 -> (-y,x)
+        'N' : n -> ((x,y + read n), a)
+        'S' : n -> ((x,y - read n), a)
+        'E' : n -> ((x - read n,y), a)
+        'W' : n -> ((x + read n,y), a)
+        'L' : n -> (spos, a - read n)
+        'R' : n -> (spos, a + read n)
+        'F' : n -> ((x + read n * sin (a * 2 * pi / 360), y + read n * cos (a * 2 * pi / 360)), a)
 
 simulate :: [String] -> Ship
 simulate = foldl step (origin,facing)
     where
-        facing = toDirection 'E'
+        facing = 0
         origin = (0,0)
 
 solve :: [String] -> Int
-solve xs = manhattan s
+solve x = round $ manhattan s
     where
-        (s,d) = simulate xs
+        (s,d) = simulate x
         origin = (0,0)
 
 main :: IO ()
