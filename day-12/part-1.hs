@@ -19,10 +19,7 @@ step (spos@(x,y), a) s =
         'F' : n -> ((x + read n * sin (a * 2 * pi / 360), y + read n * cos (a * 2 * pi / 360)), a)
 
 simulate :: [String] -> Ship
-simulate = foldl step (origin,facing)
-    where
-        facing = 0
-        origin = (0,0)
+simulate = foldl step ((0,0),0)
 
 solve :: [String] -> Int
 solve = round . manhattan . fst . simulate
