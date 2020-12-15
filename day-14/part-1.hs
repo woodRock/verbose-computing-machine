@@ -16,13 +16,15 @@ parse mask (x:xs)
         r = read $ init $ drop 4 $ head line 
         v = read $ last line
 
-solve :: Program -> Int
-solve = sum . M.elems . M.fromList . map process . parse [] 
-    where 
-        process (mask,r,v) = (r,foldr go v mask)
+process :: (BitMask,Address,Value) -> (Address,Value) 
+process (mask,r,v) = (r,foldr go v mask)
+    where
         go (i,'1') = (`setBit` i)
         go (i,'0') = (`clearBit` i)
         go (_,_) = id
+
+solve :: Program -> Int
+solve = sum . M.elems . M.fromList . map process . parse [] 
 
 main :: IO ()
 main = interact $ show . solve . lines
