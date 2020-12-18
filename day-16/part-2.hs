@@ -1,46 +1,51 @@
-import Data.Maybe
-import Data.List
 import Data.List.Split (splitOn)
-import Text.Read
-import Text.Regex.Posix
+import Control.Arrow
+import Data.List
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as M
 
 type Ticket = [Int]
 type Column = [Int]
-type Rule = [Range]
-type Range = (Int,Int)
-
--- TODO Discard invalid values
-parseDepart :: String -> [Rule]
-parseDepart = map ((\[a,b,c,d] -> [(read a,read b),(read c,read d)]) . 
-            concatMap (splitOn "-") . filter (/= "or") . words . last . splitOn ":") . filter (=~ "departure") . lines
+type Rule = (String,[Int])
+type Possible = [[String]]
+type Definite = [String]
 
 parseRules :: String -> [Rule]
-parseRules = map ((\[a,b,c,d] -> [(read a,read b),(read c,read d)]) . 
-            concatMap (splitOn "-") . filter (/= "or") . words . last . splitOn ":") . lines
+parseRules rs = map (parse . splitOn ":") $ lines rs
+    where 
+        parse = head &&& range
+        range = concatMap ((\[a,b] -> [read a .. read b]) . splitOn "-") . filter (/= "or") . words . last
 
 parseTicket :: String -> [Ticket] 
 parseTicket = map (map read . splitOn ",") . tail . lines
 
-checkCol :: Column -> [Rule] -> Bool
-checkCol col rules = any (all (== True)) (transpose j)
-    where
-        j = map (\i -> map (\[(a,b),(c,d)] -> (a <= i && i <= b) || (c <= i && i <= d) ) rules) col
-
 discard :: [Ticket] -> [Rule] -> [Ticket]
-discard ts r = filter go ts
-    where
-        go = not . any (== True) . map (\x -> all (== False) $ map (\(a,b) -> a <= x && x <= b ) (concat r))
+discard ts rs = filter check ts 
+    where   
+        check t = all (== True) $ map (\n -> True `elem` map (\r -> n `elem` snd r) rs) t
 
-check :: [Column] -> [Rule] -> [Int]
-check cols rules = map fromJust $ filter (/= Nothing) $ map (\(c,i) -> if checkCol c rules then Just i else Nothing) (zip cols [0..]) 
-
-solve :: [String] -> [Int] 
-solve s = check n r-- product $ map (\i -> m !! i) $ check n r 
+possible :: [Ticket] -> [Rule] -> Possible
+possible ts rs = p
     where
-        r = parseDepart rules 
-        m = head $ parseTicket mine
-        n = transpose $ discard (parseTicket nearby) (parseRules rules)
-        [rules,mine,nearby] = s
+        p = map check (transpose ts) -- possible 
+        check c = map (fst.head) $ filter (all ((== True).snd)) $ transpose $ map (\n -> map (\r -> (fst r, n `elem` snd r)) rs) c
+
+definite :: Possible -> Definite
+definite p
+    | solved = map head p
+    | otherwise = definite (map (\x -> if length x == 1 then x else filter (`notElem` done) x) p) 
+    where
+        done = concat $ filter ((== 1). length) p
+        solved = length p == sum (map length p)  
+
+solve :: [String] -> Int
+solve s = product $ map ((mine !!). fst) $ filter (("departure" `isInfixOf`). snd) $ zip [0..] (definite (possible valid rules))
+    where
+        rules = parseRules r
+        mine = head $ parseTicket m
+        valid = discard nearby rules
+        nearby = parseTicket n
+        [r,m,n] = s
 
 main :: IO ()
-main = interact $ unlines . map show . solve . splitOn "\n\n"
+main = interact $ show . solve . splitOn "\n\n"
