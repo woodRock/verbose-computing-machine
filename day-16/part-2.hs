@@ -1,8 +1,6 @@
 import Data.List.Split (splitOn)
 import Control.Arrow
 import Data.List
-import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as M
 
 type Ticket = [Int]
 type Column = [Int]
@@ -27,7 +25,7 @@ discard ts rs = filter check ts
 possible :: [Ticket] -> [Rule] -> Possible
 possible ts rs = p
     where
-        p = map check (transpose ts) -- possible 
+        p = map check (transpose ts) 
         check c = map (fst.head) $ filter (all ((== True).snd)) $ transpose $ map (\n -> map (\r -> (fst r, n `elem` snd r)) rs) c
 
 definite :: Possible -> Definite
