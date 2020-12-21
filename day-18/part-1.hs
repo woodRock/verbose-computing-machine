@@ -1,14 +1,26 @@
+{-# LANGUAGE DeriveFunctor #-}
+
+import Control.Monad
 import Control.Applicative
 import Data.Char
 import Data.Maybe
 import Data.List
+import Text.Printf
 
-data Expr = Value Int | Add | Multiply | Paren [Expr] deriving Show
+data Expr a =  Value a
+            | Add (Expr a) (Expr a)
+            | Mul (Expr a) (Expr a)
+            deriving (Functor)
+
+instance Show a => Show (Expr a) where
+    show (Value a) = show a
+    show (Add l r) = printf "(%s + %s)" (show l) (show r)
+    show (Mul l r) = printf "(%s * %s)" (show l) (show l)
 
 newtype Parser a = Parser { runParser :: String -> Maybe (String, a) }
 
 instance Functor Parser where
-    fmap f (Parser p) = Parser $ \input -> do 
+    fmap f (Parser p) = Parser $ \input -> do
         (input',x) <- p input
         Just (input', f x)
 
@@ -21,63 +33,76 @@ instance Applicative Parser where
 
 instance Alternative Parser where
     empty = Parser $ const Nothing
-    (Parser p1) <|> (Parser p2) = Parser $ \input -> 
+    (Parser p1) <|> (Parser p2) = Parser $ \input ->
         p1 input <|> p2 input
 
 charP :: Char -> Parser Char
-charP x = Parser f 
-    where 
-        f (y:ys) 
+charP x = Parser f
+    where
+        f (y:ys)
             | y == x = Just (ys,x)
             | otherwise = Nothing
         f [] = Nothing
 
-stringP :: String -> Parser String
-stringP = traverse charP
+spaces :: Parser String
+spaces = spanP isSpace
+
+lexeme :: Parser a -> Parser a 
+lexeme p = p <* spaces
+
+string :: String -> Parser String
+string = traverse charP
+
+symbol :: String -> Parser String
+symbol = lexeme . string
 
 spanP :: (Char -> Bool) -> Parser String
-spanP f = Parser $ \input -> 
+spanP f = Parser $ \input ->
     let (token, rest) = span f input
     in Just (rest,token)
 
 notNull :: Parser [a] -> Parser [a]
-notNull (Parser p) = Parser $ \input -> do 
+notNull (Parser p) = Parser $ \input -> do
     (input', xs) <- p input
-    if null xs 
+    if null xs
         then Nothing
         else Just (input', xs)
 
-value :: Parser Expr
-value = f <$> notNull (spanP isDigit)
-    where  
+between :: Parser a -> Parser a -> Parser (Expr Int) -> Parser (Expr Int)
+between open close p = open *> p <* close
+
+value :: Parser (Expr Int)
+value = lexeme $ f <$> notNull (spanP isDigit)
+    where
         f ds = Value $ read ds
 
-paren :: Parser Expr
-paren = Paren <$> (charP '(' *> inside <* charP ')')
-    where inside = many expression
+parens :: Parser (Expr Int) -> Parser (Expr Int)
+parens = between (symbol "(") (symbol ")")
 
-add :: Parser Expr
-add = const Add <$> stringP "+"
+expr :: Parser (Expr Int) 
+expr = chainl1 term binOp
+    where 
+        term = value <|> parens expr
+        binOp = addOp <|> mulOp
+        addOp = Add <$ symbol "+"
+        mulOp = Mul <$ symbol "*"
 
-multiply :: Parser Expr
-multiply = const Multiply <$> stringP "*"
+sepBy :: Parser a -> Parser b -> Parser [b]
+sepBy sep element = (:) <$> element <*> many (sep *> element) <|> pure []
 
-expression :: Parser Expr
-expression = value <|> add <|> multiply <|> paren
+chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
+chainl1 p op = scan
+    where
+        scan = p <**> rest
+        rest = (\f y g x -> g (f x y)) <$> op <*> p <*> rest <|> pure id
 
-check :: (Int,Expr) -> Expr -> (Int,Expr)
-check (a,Add) (Value y) = let s = a + y in (s,Value s)
-check (a,Multiply) (Value y) = let p = a * y in (p, Value p)
-check (a,_) Add = (a,Add)
-check (a,_) Multiply = (a,Multiply)
-check (a,Add) (Paren x) = let i = evaluate x in (a + i, Value i)
-check (a,Multiply) (Paren x) = let i = evaluate x in (a * i, Value i)
-
-evaluate :: [Expr] -> Int
-evaluate = fst . foldl check (0,Add)  
+eval :: Num a => Expr a -> a
+eval (Value x) = x
+eval (Add l r) = eval l + eval r
+eval (Mul l r) = eval l * eval r
 
 solve :: [String] -> Int
-solve = sum . map (evaluate . snd . fromJust . runParser (many expression) . filter (/= ' '))
+solve = sum . map (eval . snd . fromJust . runParser expr)
 
-main :: IO () 
+main :: IO ()
 main = interact $ show . solve . lines
