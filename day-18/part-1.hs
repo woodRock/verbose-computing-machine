@@ -1,10 +1,8 @@
 {-# LANGUAGE DeriveFunctor #-}
 
-import Control.Monad
 import Control.Applicative
 import Data.Char
 import Data.Maybe
-import Data.List
 import Text.Printf
 
 data Expr a =  Value a
@@ -86,9 +84,6 @@ expr = chainl1 term binOp
         binOp = addOp <|> mulOp
         addOp = Add <$ symbol "+"
         mulOp = Mul <$ symbol "*"
-
-sepBy :: Parser a -> Parser b -> Parser [b]
-sepBy sep element = (:) <$> element <*> many (sep *> element) <|> pure []
 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
 chainl1 p op = scan
