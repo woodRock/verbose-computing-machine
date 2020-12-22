@@ -1,3 +1,5 @@
+{-# LANGUAGE ViewPatterns #-}
+
 import Data.List.Split
 import Data.List
 import Data.Char
@@ -8,18 +10,18 @@ count :: Eq a => a -> [a] -> Int
 count x =  length . filter (==x)
 
 check :: Password -> Bool
-check s = c >= min && c <= max
+check (words -> split) = c >= min && c <= max
     where
         c = count char password
-        password = split !! 2 
+        password = split !! 2
         char = head (split !! 1)
-        min = read $ head range :: Int 
+        min = read $ head range :: Int
         max = read $ range !! 1 :: Int
         range = splitOn "-" $ head split
-        split = words  s 
+
 
 solve :: [Password] -> Int
 solve = length . filter check
 
-main :: IO () 
+main :: IO ()
 main = interact $ show . solve . lines

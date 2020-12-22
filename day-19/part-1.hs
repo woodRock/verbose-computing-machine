@@ -21,11 +21,10 @@ matches rules = any null . go (rules M.! 0)
           go (Rule rs) xs = concatMap (foldl (\ys r -> concatMap (go r) ys) [xs] . map (rules !)) rs
 
 solve :: [String] -> Int
-solve s = length $ filter (matches rules) messages
+solve [r,m] = length $ filter (matches rules) messages
     where
         rules = parse r
         messages = lines m 
-        [r,m] = s
 
 main :: IO ()
 main = interact $ show . solve . splitOn "\n\n"

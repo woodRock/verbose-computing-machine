@@ -1,5 +1,5 @@
 import Data.List
-import Data.List.Split 
+import Data.List.Split
 import Math.NumberTheory.Moduli.Chinese (chineseRemainder)
 
 parse :: String -> [(Integer, Integer)]

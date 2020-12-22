@@ -1,16 +1,25 @@
-import Data.List (transpose)
-import Data.List.Split (splitOn)
-import Data.Map.Strict (Map, (!))
-import qualified Data.Map.Strict as M
+{-# LANGUAGE ViewPatterns #-}
 
-parse :: String -> (Int,[String])
-parse s = (key,v)
+import Data.List (transpose,sort,group,elem)
+import Data.List.Split (splitOn)
+
+type Id = Int
+type Edge = String
+
+canonical :: Edge -> Edge
+canonical = min <$> id <*> reverse
+
+parse :: String -> (Id,[Edge])
+parse (lines -> (k:v)) =  (key,value)
     where 
         key = read $ init $ last $ words k
-        (k:v) = lines s
+        value = map (canonical . head) $ take 4 $ iterate (transpose . reverse) v
 
-solve :: [String] -> Map Int [String]
-solve = M.fromList . map parse
+solve :: [String] -> Int
+solve (map parse -> tiles) = product corners
+    where
+        corners = map fst $ filter (\(id,edges) -> (\x -> length x == 2) (filter (== True) (map (`elem` unique) edges))) tiles
+        unique = concat $ filter ((==1) . length) $ group $ sort $ concatMap snd tiles
 
 main :: IO ()
 main = interact $ show . solve . splitOn "\n\n"

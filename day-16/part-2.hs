@@ -37,13 +37,12 @@ definite p
         solved = length p == sum (map length p)  
 
 solve :: [String] -> Int
-solve s = product $ map ((mine !!). fst) $ filter (("departure" `isInfixOf`). snd) $ zip [0..] (definite (possible valid rules))
+solve [r,m,n] = product $ map ((mine !!). fst) $ filter (("departure" `isInfixOf`). snd) $ zip [0..] (definite (possible valid rules))
     where
         rules = parseRules r
         mine = head $ parseTicket m
         valid = discard nearby rules
         nearby = parseTicket n
-        [r,m,n] = s
 
 main :: IO ()
 main = interact $ show . solve . splitOn "\n\n"

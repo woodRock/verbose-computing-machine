@@ -14,12 +14,11 @@ check :: Ticket -> [Range] -> [Int]
 check t r = filter (\x -> all (== False) $ map (\(a,b) -> a <= x && x <= b ) r) t
 
 solve :: [String] -> Int
-solve s = sum $ concatMap (`check` r) n 
+solve [rules,mine,nearby] = sum $ concatMap (`check` r) n 
     where
         m = head $ parseTickets mine
         n = parseTickets nearby
         r = parseRules rules    
-        [rules,mine,nearby] = s
 
 main :: IO ()
 main = interact $ show . solve . splitOn "\n\n"
