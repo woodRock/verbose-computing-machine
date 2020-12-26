@@ -35,8 +35,8 @@ matchAllergens possible
         (allergen,ingredient) = extractSingletonSet . find ((==1) . S.size . snd) . M.toList $ possible
         extractSingletonSet (Just (a,i)) = (a, head . S.toList $ i)
 
-solve :: [String] -> Map Allergen (Set Ingredient)
-solve (parse -> foods) = possible
+solve :: [String] -> String
+solve (parse -> foods) = dangerous
     where 
         ingredients = S.fromList . concatMap fst $ foods 
         possible = possibleAllergens foods 

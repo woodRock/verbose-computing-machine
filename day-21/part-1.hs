@@ -11,11 +11,6 @@ type Ingredient = String
 type Allergen = String
 type Food = ([Ingredient], [Allergen])
 
-toMap :: [Food] -> Map Allergen (Set Ingredient)
-toMap = foldl1 (M.unionWith S.intersection) . map go
-    where
-        go (i,a) = M.fromList $ zip a (repeat (S.fromList i))
-
 parse :: [String] -> [Food]
 parse = map go
     where 
@@ -23,6 +18,11 @@ parse = map go
         i = words . head 
         a = words . filter (/= ',') . init . last
         split = splitOn "(contains "
+
+toMap :: [Food] -> Map Allergen (Set Ingredient)
+toMap = foldl1 (M.unionWith S.intersection) . map go
+    where
+        go (i,a) = M.fromList $ zip a (repeat (S.fromList i))
 
 solve :: [String] -> Int 
 solve (parse -> foods) = length . concatMap (filter (`S.member` safeIngredients) . fst) $ foods
