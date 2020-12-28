@@ -9,18 +9,15 @@ three = take 3 . drop 1
 dec :: Int -> [Int] -> Int
 dec 1 a = maximum (a \\ three a)
 dec n a 
-    | next `elem` three a = dec next a
-    | otherwise = next
-    where
-        next = n - 1
+    | (n - 1) `elem` three a = dec (n - 1) a
+    | otherwise = n - 1
 
 makeHead :: Int -> [Int] -> [Int]
-makeHead i s = take (length s) . dropWhile (/= i) . cycle $ s
+makeHead i a = take (length a) . dropWhile (/= i) . cycle $ a
 
 turn :: [Int] -> [Int]
-turn a = makeHead n res
+turn a = makeHead (a !! 4) res
     where 
-        n = a !! 4
         res = head r : three a ++ takeWhile (/= head r) (drop 1 $ cycle r)
         r = makeHead (dec (head a) a) a \\ three a
 
