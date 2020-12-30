@@ -7,8 +7,7 @@ import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Control.Applicative
 
-type Point = (Int,Int)
-data Dir = E | SE | SW | W | NW | NE deriving (Show, Bounded, Enum, Eq, Ord)
+data Dir = E | SE | SW | W | NW | NE deriving (Show, Eq, Read, Ord, Bounded, Enum)
 
 newtype Parser a = Parser { runParser :: String -> Maybe (String, a) }
 
@@ -78,13 +77,11 @@ parse :: [String] -> [[Dir]]
 parse = map go
     where go = snd . fromJust . runParser (many direction)
 
-eval :: [Dir] -> Point
 eval = foldl go origin
     where
         go (x,y) (dir -> (x',y')) = (x+x',y+y')
         origin = (0,0)
 
-dir :: Dir -> Point
 dir E  = (1,0)
 dir W  = (-1,0)
 dir NE = (1,1)
@@ -92,7 +89,6 @@ dir NW = (0,1)
 dir SE = (0,-1)
 dir SW = (-1,-1)
 
-neighbours :: [Point]
 neighbours = map dir [minBound .. maxBound] 
 
 count :: Eq a => a -> [a] -> Int
@@ -120,7 +116,7 @@ mapnbs nbs f m = V.imap (\y v -> V.imap (\x i -> modify i (x,y)) v) m
 day :: Int -> [[Bool]] -> [[Bool]]
 day n = vtol2 . (!! n) . iterate (mapnbs neighbours rule) . ltov2
 
-toMap :: Int -> [Point] -> [[Bool]]
+toMap :: Int -> [(Int,Int)] -> [[Bool]]
 toMap margin xs = [[(x,y) `elem` xs | x <- [minx - margin .. maxx + margin]] | y <- [miny - margin .. maxy + margin]]
     where 
         (minx, miny) = minimum xs
