@@ -1,7 +1,5 @@
 foo :: (Int,Int) -> Int 
-foo (a,b) 
-  | a < b = 1 
-  | otherwise = 0
+foo (a,b) = fromEnum $ a < b
 
 solve :: [Int] -> Int 
 solve x = sum $ map foo $ zip t $ tail t 
