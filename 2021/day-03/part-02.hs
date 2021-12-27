@@ -3,28 +3,21 @@ import Data.Char (digitToInt)
 
 binarytoint :: [Int] -> Int 
 binarytoint a = sum $ map (\(x,y) -> y*2^x) $ zip (reverse [0..n]) a
-  where 
-    n = (length a) - 1
-oxygen :: [[Int]] -> Int -> [Int] 
-oxygen a i
-  | length f == 1 = f !! 0
-  | otherwise = oxygen f (i + 1) 
-  where
-    f = filter ((== msb).(!! i)) a
-    msb = fromEnum $ 2 * sum x >= length x
-    x = (!! i) $ transpose a
+  where n = (length a) - 1
 
-life :: [[Int]] -> Int -> [Int] 
-life a i
+rating :: [[Int]] -> Int -> String -> [Int] 
+rating a i r
   | length f == 1 = f !! 0
-  | otherwise = life f (i + 1) 
+  | otherwise = rating f (i + 1) r 
   where
-    f = filter ((== lsb).(!! i)) a
-    lsb = fromEnum $ 2 * sum x < length x
+    f = filter ((== fromEnum sb).(!! i)) a
+    sb 
+      | r == "life" = 2 * sum x < length x  
+      | r == "oxygen" = 2 * sum x >= length x
     x = (!! i) $ transpose a
 
 solve :: [[Int]] -> Int
-solve x = product $ map binarytoint $ [oxygen x 0, life x 0] 
+solve x = product $ map binarytoint $ [rating x 0 "life", rating x 0 "oxygen"] 
 
 main :: IO () 
 main = interact $ show . solve . map (map digitToInt) . lines  
