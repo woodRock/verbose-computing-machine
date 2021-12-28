@@ -11,7 +11,7 @@ solve x = product $ map binarytoint [epsilon, gamma]
   where
     epsilon = map (fromEnum . (== 0)) gamma   
     gamma = map foo $ transpose x 
-    foo x = fromEnum $ sum x > (length x `div` 2)
+    foo x = fromEnum $ 2 * sum x > length x
 
 main :: IO () 
 main = interact $ show . solve . map (map digitToInt) . lines  
