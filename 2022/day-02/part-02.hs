@@ -1,33 +1,40 @@
-import Data.Char
-import Data.Text (replace, pack, unpack)
+import Data.List.Split (splitOn)
 
-replace_words_with_nums:: String -> String
-replace_words_with_nums x = 
-    foldl (\x (s,s') -> 
-        unpack $ replace (pack s) (pack s') (pack x)) 
-    x number_strings_dict
-    where 
-        number_strings_dict = [
-            ("one","one1one"),
-            ("two","two2two"),
-            ("three","three3three"),
-            ("four","four4four"),
-            ("five","five5five"),
-            ("six","six6six"),
-            ("seven","seven7seven"),
-            ("eight","eight8eight"),
-            ("nine","nine9nine")
-         ]
+type Round = [[String]]
+type MinimumDice = (Int, Int, Int)
 
-solve :: String -> Int 
-solve x = first_digit * 10 + last_digit
+add' :: MinimumDice -> MinimumDice -> MinimumDice
+add' (a,b,c) (a',b',c') = (a+a',b+b',c+c')
+
+powerset:: MinimumDice -> Int 
+powerset (a,b,c) = a * b * c 
+
+match:: Int -> String -> MinimumDice
+match score "red" = (score,0,0)
+match score "green" = (0,score,0)
+match score "blue" = (0,0,score)
+
+match_all:: Round -> MinimumDice
+match_all round = foldr add' (0,0,0) 
+                (map (\[score, color] -> 
+                    match (read score::Int) 
+                color) round)
+
+mininum_dice:: MinimumDice -> MinimumDice -> MinimumDice
+mininum_dice (a,b,c) (a',b',c') = (max a a', max b b', max c c')
+
+solve :: String -> Int
+solve x = power_set
     where 
-        number_strings = replace_words_with_nums x 
-        numbers_only = 
-            map (\x -> read [x]::Int) 
-            (filter (\x -> isDigit x) number_strings) 
-        first_digit = head numbers_only 
-        last_digit = last numbers_only 
+        [game , results] = splitOn ": " x
+        [_, game_no] = splitOn " " game
+        game_id = read game_no :: Int
+        rounds = splitOn "; " results
+        map_rounds = map (\x-> splitOn ", " x) rounds
+        map_colors = map (\y -> map (\x-> splitOn " " x) y) map_rounds
+        map_dice = map match_all map_colors
+        minimum_die = foldr mininum_dice (0,0,0) map_dice
+        power_set = powerset minimum_die
 
 main :: IO () 
-main = interact $ show . sum . map solve . lines
+main = interact $ show  . sum . map solve . lines
