@@ -1,40 +1,75 @@
-import Data.List.Split (splitOn)
+import Data.Char (isDigit)
+import Data.List (tails)
 
-type Round = [[String]]
-type MinimumDice = (Int, Int, Int)
+type Value = String 
+type YIndex = Int
+type XIndex = Int
+type Start = XIndex
+type End = XIndex
+type Position = (Value, YIndex, Start, End)
+type Number = Position
+type Gear = Position
 
-add' :: MinimumDice -> MinimumDice -> MinimumDice
-add' (a,b,c) (a',b',c') = (a+a',b+b',c+c')
+parse :: String -> YIndex -> XIndex -> [Position] -> [Position]
+parse [] y_index x_index positions = positions   
+parse ('*':xs) y_index x_index positions -- Gear
+    = parse xs y_index (x_index + 1) (positions ++ [('*':[], y_index, x_index, x_index + 1)]) 
+parse (x:y:z:xs) y_index x_index positions -- 3 digit number
+    | isDigit x && isDigit y && isDigit z 
+    = parse xs y_index (x_index + 3) (positions ++ [(x:[]++y:[]++z:[], y_index, x_index, x_index + 3)])
+parse (x:y:xs) y_index x_index positions -- 2 digit number
+    | isDigit x && isDigit y 
+    = parse xs y_index (x_index + 2) (positions ++ [(x:[]++y:[], y_index, x_index, x_index + 2)]) 
+parse (x:xs) y_index x_index positions -- 1 digit number
+    | isDigit x 
+    = parse xs y_index (x_index + 1) (positions ++ [(x:[], y_index, x_index, x_index + 1)])
+parse (x:xs) y_index x_index positions -- Symbol or full stop
+    = parse xs y_index (x_index + 1) positions
 
-powerset:: MinimumDice -> Int 
-powerset (a,b,c) = a * b * c 
+adjacent:: Number -> Gear -> Bool
+adjacent (n_val, n_y_index, n_start, n_end) (s_val, s_y_index, s_start, s_end)
+    | n_y_index == s_y_index && n_start - 1 <= s_start && n_end + 1 >= s_end = True -- Same
+    | n_y_index == s_y_index - 1 && n_start - 1 <= s_start && n_end + 1 >= s_end = True -- Above 
+    | n_y_index == s_y_index + 1 && n_start - 1 <= s_start && n_end + 1 >= s_end = True -- Below
+    | otherwise = False -- Not adjacent
 
-match:: Int -> String -> MinimumDice
-match score "red" = (score,0,0)
-match score "green" = (0,score,0)
-match score "blue" = (0,0,score)
+pairs :: [a] -> [(a, a)]
+pairs l = [(x,y) | (x:ys) <- tails l, y <- ys]
 
-match_all:: Round -> MinimumDice
-match_all round = foldr add' (0,0,0) 
-                (map (\[score, color] -> 
-                    match (read score::Int) 
-                color) round)
-
-mininum_dice:: MinimumDice -> MinimumDice -> MinimumDice
-mininum_dice (a,b,c) (a',b',c') = (max a a', max b b', max c c')
-
-solve :: String -> Int
-solve x = power_set
+check_all:: [Number] -> [Gear] -> [(Number, Number)]
+check_all numbers gears = valid_pairs
     where 
-        [game , results] = splitOn ": " x
-        [_, game_no] = splitOn " " game
-        game_id = read game_no :: Int
-        rounds = splitOn "; " results
-        map_rounds = map (\x-> splitOn ", " x) rounds
-        map_colors = map (\y -> map (\x-> splitOn " " x) y) map_rounds
-        map_dice = map match_all map_colors
-        minimum_die = foldr mininum_dice (0,0,0) map_dice
-        power_set = powerset minimum_die
+        all_pairs = pairs numbers
+        valid_pairs = filter (\(a, b) -> or (map (\g -> adjacent a g && adjacent b g) gears)) all_pairs
+
+get_gears:: (String, YIndex) -> [Gear]
+get_gears (str, idx) = gears
+    where 
+        positions = parse str idx 0 []
+        gears = filter is_gear $ positions
+        first_number (x, _, _, _) = x
+        is_gear = (==) '*' . head . first_number
+
+get_numbers:: (String, YIndex) -> [Number]
+get_numbers (str, idx) = numbers
+    where 
+        positions = parse str idx 0 []
+        numbers = (filter is_number) $ positions
+        is_number = isDigit . head . first_number
+        first_number (x, _, _, _) = x
+
+format:: String -> [(String, YIndex)]
+format x = (\y -> zip y [0..]) $ lines x 
+
+magic:: String -> String
+magic x = show $ sum_of_valid
+    where 
+        numbers = concat $ map get_numbers $ format x
+        gears = concat $ map get_gears $ format x
+        first_number (x, _, _, _) = x
+        valid_pairs = check_all numbers gears
+        multiply_gears = map (\(a, b) -> (read (first_number a) :: Int) * (read (first_number b) :: Int)) valid_pairs
+        sum_of_valid = sum multiply_gears
 
 main :: IO () 
-main = interact $ show  . sum . map solve . lines
+main = interact magic

@@ -27,10 +27,10 @@ parse (x:xs) y_index x_index positions -- Symbol
 
 check:: Number -> Symbol -> Bool
 check (n_val, n_y_index, n_start, n_end) (s_val, s_y_index, s_start, s_end)
-    | n_y_index == s_y_index && n_start - 1 <= s_start && n_end + 1 >= s_end = True
+    | n_y_index == s_y_index && n_start - 1 <= s_start && n_end + 1 >= s_end = True -- Same
     | n_y_index == s_y_index - 1 && n_start - 1 <= s_start && n_end + 1 >= s_end = True -- Above 
     | n_y_index == s_y_index + 1 && n_start - 1 <= s_start && n_end + 1 >= s_end = True -- Below
-    | otherwise = False
+    | otherwise = False -- Not adjacent
 
 check_all:: [Number] -> [Symbol] -> [Bool]
 check_all numbers symbols = (map (\n -> or (map (\s -> check n s) symbols)) numbers)
