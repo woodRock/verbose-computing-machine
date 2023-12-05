@@ -25,6 +25,15 @@ parse (x:xs) y_index x_index positions -- 1 digit number
 parse (x:xs) y_index x_index positions -- Symbol
     = parse xs y_index (x_index + 1) (positions ++ [(x:[], y_index, x_index, x_index + 1)]) 
 
+first_number:: Position -> String
+first_number (x, _, _, _) = x
+
+is_number:: Position -> Bool
+is_number = isDigit . head . first_number
+
+is_symbol:: Position -> Bool
+is_symbol = not . is_number
+
 check:: Number -> Symbol -> Bool
 check (n_val, n_y_index, n_start, n_end) (s_val, s_y_index, s_start, s_end)
     | n_y_index == s_y_index && n_start - 1 <= s_start && n_end + 1 >= s_end = True -- Same
@@ -40,17 +49,12 @@ get_symbols (str, idx) = symbols
     where 
         positions = parse str idx 0 []
         symbols = filter is_symbol $ positions
-        is_number = isDigit . head . first_number
-        first_number (x, _, _, _) = x
-        is_symbol = not . is_number
 
 get_numbers:: (String, YIndex) -> [Number]
 get_numbers (str, idx) = numbers
     where 
         positions = parse str idx 0 []
         numbers = (filter is_number) $ positions
-        is_number = isDigit . head . first_number
-        first_number (x, _, _, _) = x
 
 format:: String -> [(String, YIndex)]
 format x = (\y -> zip y [0..]) $ lines x 
@@ -62,7 +66,6 @@ magic x = show sum_of_valid
         symbols = concat $ map get_symbols $ format x
         results = check_all numbers symbols
         valid_numbers = map first_number $ map fst $ filter snd $ zip numbers results :: [String]
-        first_number (x, _, _, _) = x :: String
         sum_of_valid = sum $ map (\x -> read x :: Int) valid_numbers :: Int
 
 main :: IO () 
