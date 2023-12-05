@@ -26,6 +26,18 @@ parse (x:xs) y_index x_index positions -- 1 digit number
 parse (x:xs) y_index x_index positions -- Symbol or full stop
     = parse xs y_index (x_index + 1) positions
 
+first_number:: Position -> String
+first_number (x, _, _, _) = x
+
+is_number:: Position -> Bool
+is_number = isDigit . head . first_number
+
+is_gear:: Position -> Bool
+is_gear = (==) '*' . head . first_number
+
+multiply:: (Number, Number) -> Int
+multiply = \(a, b) -> (read (first_number a) :: Int) * (read (first_number b) :: Int)
+
 adjacent:: Number -> Gear -> Bool
 adjacent (n_val, n_y_index, n_start, n_end) (s_val, s_y_index, s_start, s_end)
     | n_y_index == s_y_index && n_start - 1 <= s_start && n_end + 1 >= s_end = True -- Same
@@ -47,16 +59,13 @@ get_gears (str, idx) = gears
     where 
         positions = parse str idx 0 []
         gears = filter is_gear $ positions
-        first_number (x, _, _, _) = x
-        is_gear = (==) '*' . head . first_number
+        
 
 get_numbers:: (String, YIndex) -> [Number]
 get_numbers (str, idx) = numbers
     where 
         positions = parse str idx 0 []
         numbers = (filter is_number) $ positions
-        is_number = isDigit . head . first_number
-        first_number (x, _, _, _) = x
 
 format:: String -> [(String, YIndex)]
 format x = (\y -> zip y [0..]) $ lines x 
@@ -66,9 +75,8 @@ magic x = show $ sum_of_valid
     where 
         numbers = concat $ map get_numbers $ format x
         gears = concat $ map get_gears $ format x
-        first_number (x, _, _, _) = x
         valid_pairs = check_all numbers gears
-        multiply_gears = map (\(a, b) -> (read (first_number a) :: Int) * (read (first_number b) :: Int)) valid_pairs
+        multiply_gears = map multiply valid_pairs
         sum_of_valid = sum multiply_gears
 
 main :: IO () 
