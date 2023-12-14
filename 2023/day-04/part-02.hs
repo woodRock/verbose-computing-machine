@@ -29,14 +29,18 @@ score cn m (w:ws, numbers)
     | w `elem` numbers = score cn (m + 1) (ws, numbers)
     | otherwise = score cn m (ws, numbers)
 
-solve:: [Multiplier] -> [Matches] -> Scorecards
-solve multipliers matches = sum $ zipWith (*) multipliers $ map (length . snd) matches
+solve:: Int -> [Matches] -> [(CardNo, [Int])]
+solve 1 ((1, m):ms) = (((1, m):ms)  ++ map (\idx -> ((1, m):ms)  !! (idx - 1)) m) ++ solve 2 ms
+solve x ((n, m):ms)
+    | x >= (length ((n, m):ms) - 1) = []
+    | x == n = (((n, m):ms) ++ map (\idx -> ((n, m):ms)  !! (idx - 1)) m) ++ solve (x + 1) ms
+    | otherwise = solve (x + 1) ms
 
 magic:: String -> String
-magic x = show $ matches
+magic x = show $ sort $ solve 1 matches
     where 
         matches = map (\(cn, c) -> score cn 0 c) . zip [1.. ] . map parse . lines $ x
-        multipliers = group . sort . concat . map snd $ matches
+
 
 main :: IO () 
 main = interact magic
