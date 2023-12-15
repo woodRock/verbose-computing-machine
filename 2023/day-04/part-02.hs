@@ -11,7 +11,6 @@ type Score = Int -- number of matches for given card.
 type Scorecards = Int -- total number of score cards.
 type Winning = [Int]
 type Numbers = [Int]
-type Multiplier = Int -- Multiplier for each card.
 type Card = (Winning, Numbers)
 type Matches = (CardNo, [Int])
 type Copies = (CardNo, [Int])
