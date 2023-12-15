@@ -1,5 +1,5 @@
 import Data.List.Split (splitOn)
-import Data.List (tails, sort, group)
+import Data.List (sort)
 import Control.Applicative
 
 -- Here is one line of input.
@@ -14,6 +14,9 @@ type Numbers = [Int]
 type Multiplier = Int -- Multiplier for each card.
 type Card = (Winning, Numbers)
 type Matches = (CardNo, [Int])
+type Copies = (CardNo, [Int])
+type LimitIndex = Int
+type CardIndex = Int
 
 parse :: String -> Card 
 parse x = (winning, numbers)
@@ -29,18 +32,27 @@ score cn m (w:ws, numbers)
     | w `elem` numbers = score cn (m + 1) (ws, numbers)
     | otherwise = score cn m (ws, numbers)
 
-solve:: Int -> [Matches] -> [(CardNo, [Int])]
-solve 1 ((1, m):ms) = (((1, m):ms)  ++ map (\idx -> ((1, m):ms)  !! (idx - 1)) m) ++ solve 2 ms
-solve x ((n, m):ms)
-    | x >= (length ((n, m):ms) - 1) = []
-    | x == n = (((n, m):ms) ++ map (\idx -> ((n, m):ms)  !! (idx - 1)) m) ++ solve (x + 1) ms
-    | otherwise = solve (x + 1) ms
+solve :: LimitIndex -> CardIndex -> [Matches] -> [Copies] -> ([Matches], [Copies])
+solve limit x ((n, matches):xs) copies
+    | limit <= x = (((n, matches):xs), copies)
+    | otherwise = 
+        solve limit (x + 1)
+            ((n, matches):xs)  -- Original tickets 
+            (copies ++ matched ++ make_copies) -- Copies
+    where 
+        to_match = snd $ ((1, matches):xs) !! (x - 1)
+        (ms, cs) = (((n, matches):xs), copies)
+        count = length $ filter ((==) x . fst) $ concat $ (ms, cs)
+        matched = (map (\match -> ms !! (match - 1)) to_match) 
+        make_copies = concat $ take count $ repeat matched
 
 magic:: String -> String
-magic x = show $ sort $ solve 1 matches
+magic x = show $ scorecards
     where 
         matches = map (\(cn, c) -> score cn 0 c) . zip [1.. ] . map parse . lines $ x
-
+        limit = length matches
+        (originals, copies) = solve limit 1 matches []
+        scorecards = length $ originals ++ copies
 
 main :: IO () 
 main = interact magic
