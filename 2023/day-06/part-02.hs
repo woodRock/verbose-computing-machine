@@ -16,7 +16,6 @@ isInt x = x == fromInteger (round x)
 solve :: (Time,Distance) -> Int
 solve (time, distance) =  winners
     where 
-        races = (time, distance)
         a = -1 -- Acceleration
         h = time / 2 -- Vertex x 
         k = h ^ 2 -- Vertex y  
