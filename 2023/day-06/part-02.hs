@@ -23,8 +23,7 @@ solve (time, distance) =  winners
         x_1 y = - sqrt ((y - k) / a) + h -- Solve for x 
         lower_bound = x_1 distance
         peak_is_int = isInt $ y h
-        peak_round = if peak_is_int then 1 else 0
-        rounding_error = peak_round 
+        rounding_error = if peak_is_int then 1 else 0
         winners = round(2 * (h - lower_bound)) - rounding_error
 
 main :: IO()
