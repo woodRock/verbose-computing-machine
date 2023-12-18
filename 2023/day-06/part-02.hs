@@ -25,9 +25,7 @@ solve (time, distance) =  winners
         lower_bound = x_1 distance
         peak_is_int = isInt $ y h
         peak_round = if peak_is_int then 1 else 0
-        -- root_is_int = isInt $ lower_bound
-        -- root_round = if root_is_int then 0 else 2
-        rounding_error = peak_round  -- + root_round
+        rounding_error = peak_round 
         winners = round(2 * (h - lower_bound)) - rounding_error
 
 main :: IO()
