@@ -14,7 +14,7 @@ parse x = (hand, score)
         [hand, tmp_score] = words x
         score = read tmp_score :: Int
 
-getType :: Hand -> Int
+getType :: Hand -> Type
 getType hand
     | a == b && b == c && c == d && d == e || 
         a == b && b == c && c == d && e == 'J' || 
