@@ -22,7 +22,6 @@ getType hand
         a == 'J' && b == 'J' && c == 'J' && d == e || 
         a == 'J' && b == 'J' && c == 'J' && d == 'J' 
         = 7 -- Five of a kind
-        -- = (7, ordered_hand)
     | a == b && b == c && c == d ||
         a == b && b == c && d == 'J' || 
         a == b && c == 'J' && d == 'J' || 
@@ -30,40 +29,28 @@ getType hand
         a == 'J' && b == 'J' && c == d || 
         a == 'J' && b == 'J' && c == 'J'
         = 6 -- Four of a kind
-        -- = (6, ordered_hand)
-    | 
-        a == b && b == c && d == e || 
+    | a == b && b == c && d == e || 
         a == b && b == c && e == 'J' || 
         a == b && c == 'J' && d == e || 
         a == b && c == d && e == 'J' 
         = 5 -- Full house
-        -- = (5,ordered_hand) 
-    | 
-        a == b && b == c ||     
+    | a == b && b == c ||     
         a == b && c == 'J' || 
         a == b && d == 'J' || 
         a == b && e == 'J' || 
         a == 'J' && b == 'J'
         = 4 -- Three of a kind
-        -- = (4, ordered_hand)
-    | 
-        a == b && c == d || 
-        a == b && e == 'J' ||
-        a == 'J' && b == c
+    | a == b && c == d
         = 3 -- Two pair
-        -- = (3, ordered_hand)
-    | 
-        a == b || 
+    | a == b || 
         a == 'J' || 
         b == 'J' || 
         c == 'J' || 
         d == 'J' || 
         e == 'J'
         = 2 -- One pair
-        -- = (2, ordered_hand)
     | otherwise 
         = 1 -- High card
-        -- = (1, ordered_hand)
     where 
         ordered_hand = (concat . 
                         sortBy (\a b -> compare (length b) (length a)) . 
