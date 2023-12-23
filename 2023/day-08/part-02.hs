@@ -17,9 +17,6 @@ parse (x:xs) = (node, (left, right)) : parse  xs
         left = init . tail . head . tail . tail . words $ x
         right = init . last . tail . words $ x  
 
-allEndWithZ :: [Node] -> Bool 
-allEndWithZ a = (==) (length a) . length . filter (\x -> (last x) == 'Z') $ a
-
 solve:: Int -> Node -> String -> M.Map Node (Leaf, Leaf) -> Int
 solve count [_,_,'Z'] _ _ = count
 solve count node (i:is) treeMap  
