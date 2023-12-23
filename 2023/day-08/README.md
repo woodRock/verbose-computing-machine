@@ -1,78 +1,68 @@
---- Day 7: Camel Cards ---
-Your all-expenses-paid trip turns out to be a one-way, five-minute ride in an airship. (At least it's a cool airship!) It drops you off at the edge of a vast desert and descends back to Island Island.
+--- Day 8: Haunted Wasteland ---
+You're still riding a camel across Desert Island when you spot a sandstorm quickly approaching. When you turn to warn the Elf, she disappears before your eyes! To be fair, she had just finished warning you about ghosts a few minutes ago.
 
-"Did you bring the parts?"
+One of the camel's pouches is labeled "maps" - sure enough, it's full of documents (your puzzle input) about how to navigate the desert. At least, you're pretty sure that's what they are; one of the documents contains a list of left/right instructions, and the rest of the documents seem to describe some kind of network of labeled nodes.
 
-You turn around to see an Elf completely covered in white clothing, wearing goggles, and riding a large camel.
+It seems like you're meant to use the left/right instructions to navigate the network. Perhaps if you have the camel follow the same instructions, you can escape the haunted wasteland!
 
-"Did you bring the parts?" she asks again, louder this time. You aren't sure what parts she's looking for; you're here to figure out why the sand stopped.
+After examining the maps for a bit, two nodes stick out: AAA and ZZZ. You feel like AAA is where you are now, and you have to follow the left/right instructions until you reach ZZZ.
 
-"The parts! For the sand, yes! Come with me; I will show you." She beckons you onto the camel.
+This format defines each node of the network individually. For example:
 
-After riding a bit across the sands of Desert Island, you can see what look like very large rocks covering half of the horizon. The Elf explains that the rocks are all along the part of Desert Island that is directly above Island Island, making it hard to even get there. Normally, they use big machines to move the rocks and filter the sand, but the machines have broken down because Desert Island recently stopped receiving the parts they need to fix the machines.
+RL
 
-You've already assumed it'll be your job to figure out why the parts stopped when she asks if you can help. You agree automatically.
+AAA = (BBB, CCC)
+BBB = (DDD, EEE)
+CCC = (ZZZ, GGG)
+DDD = (DDD, DDD)
+EEE = (EEE, EEE)
+GGG = (GGG, GGG)
+ZZZ = (ZZZ, ZZZ)
+Starting with AAA, you need to look up the next element based on the next left/right instruction in your input. In this example, start with AAA and go right (R) by choosing the right element of AAA, CCC. Then, L means to choose the left element of CCC, ZZZ. By following the left/right instructions, you reach ZZZ in 2 steps.
 
-Because the journey will take a few days, she offers to teach you the game of Camel Cards. Camel Cards is sort of similar to poker except it's designed to be easier to play while riding a camel.
+Of course, you might not find ZZZ right away. If you run out of left/right instructions, repeat the whole sequence of instructions as necessary: RL really means RLRLRLRLRLRLRLRL... and so on. For example, here is a situation that takes 6 steps to reach ZZZ:
 
-In Camel Cards, you get a list of hands, and your goal is to order them based on the strength of each hand. A hand consists of five cards labeled one of A, K, Q, J, T, 9, 8, 7, 6, 5, 4, 3, or 2. The relative strength of each card follows this order, where A is the highest and 2 is the lowest.
+LLR
 
-Every hand is exactly one type. From strongest to weakest, they are:
+AAA = (BBB, BBB)
+BBB = (AAA, ZZZ)
+ZZZ = (ZZZ, ZZZ)
+Starting at AAA, follow the left/right instructions. How many steps are required to reach ZZZ?
 
-Five of a kind, where all five cards have the same label: AAAAA
-Four of a kind, where four cards have the same label and one card has a different label: AA8AA
-Full house, where three cards have the same label, and the remaining two cards share a different label: 23332
-Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
-Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
-One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
-High card, where all cards' labels are distinct: 23456
-Hands are primarily ordered based on type; for example, every full house is stronger than any three of a kind.
-
-If two hands have the same type, a second ordering rule takes effect. Start by comparing the first card in each hand. If these cards are different, the hand with the stronger first card is considered stronger. If the first card in each hand have the same label, however, then move on to considering the second card in each hand. If they differ, the hand with the higher second card wins; otherwise, continue with the third card in each hand, then the fourth, then the fifth.
-
-So, 33332 and 2AAAA are both four of a kind hands, but 33332 is stronger because its first card is stronger. Similarly, 77888 and 77788 are both a full house, but 77888 is stronger because its third card is stronger (and both hands have the same first and second card).
-
-To play Camel Cards, you are given a list of hands and their corresponding bid (your puzzle input). For example:
-
-32T3K 765
-T55J5 684
-KK677 28
-KTJJT 220
-QQQJA 483
-This example shows five hands; each hand is followed by its bid amount. Each hand wins an amount equal to its bid multiplied by its rank, where the weakest hand gets rank 1, the second-weakest hand gets rank 2, and so on up to the strongest hand. Because there are five hands in this example, the strongest hand will have rank 5 and its bid will be multiplied by 5.
-
-So, the first step is to put the hands in order of strength:
-
-32T3K is the only one pair and the other hands are all a stronger type, so it gets rank 1.
-KK677 and KTJJT are both two pair. Their first cards both have the same label, but the second card of KK677 is stronger (K vs T), so KTJJT gets rank 2 and KK677 gets rank 3.
-T55J5 and QQQJA are both three of a kind. QQQJA has a stronger first card, so it gets rank 5 and T55J5 gets rank 4.
-Now, you can determine the total winnings of this set of hands by adding up the result of multiplying each hand's bid with its rank (765 * 1 + 220 * 2 + 28 * 3 + 684 * 4 + 483 * 5). So the total winnings in this example are 6440.
-
-Find the rank of every hand in your set. What are the total winnings?
-
-Your puzzle answer was 252295678.
+Your puzzle answer was 22357.
 
 --- Part Two ---
-To make things a little more interesting, the Elf introduces one additional rule. Now, J cards are jokers - wildcards that can act like whatever card would make the hand the strongest type possible.
+The sandstorm is upon you and you aren't any closer to escaping the wasteland. You had the camel follow the instructions, but you've barely left your starting position. It's going to take significantly more steps to escape!
 
-To balance this, J cards are now the weakest individual cards, weaker even than 2. The other cards stay in the same order: A, K, Q, T, 9, 8, 7, 6, 5, 4, 3, 2, J.
+What if the map isn't for people - what if the map is for ghosts? Are ghosts even bound by the laws of spacetime? Only one way to find out.
 
-J cards can pretend to be whatever card is best for the purpose of determining hand type; for example, QJJQ2 is now considered four of a kind. However, for the purpose of breaking ties between two hands of the same type, J is always treated as J, not the card it's pretending to be: JKKK2 is weaker than QQQQ2 because J is weaker than Q.
+After examining the maps a bit longer, your attention is drawn to a curious fact: the number of nodes with names ending in A is equal to the number ending in Z! If you were a ghost, you'd probably just start at every node that ends with A and follow all of the paths at the same time until they all simultaneously end up at nodes that end with Z.
 
-Now, the above example goes very differently:
+For example:
 
-32T3K 765
-T55J5 684
-KK677 28
-KTJJT 220
-QQQJA 483
-32T3K is still the only one pair; it doesn't contain any jokers, so its strength doesn't increase.
-KK677 is now the only two pair, making it the second-weakest hand.
-T55J5, KTJJT, and QQQJA are now all four of a kind! T55J5 gets rank 3, QQQJA gets rank 4, and KTJJT gets rank 5.
-With the new joker rule, the total winnings in this example are 5905.
+LR
 
-Using the new joker rule, find the rank of every hand in your set. What are the new total winnings?
+11A = (11B, XXX)
+11B = (XXX, 11Z)
+11Z = (11B, XXX)
+22A = (22B, XXX)
+22B = (22C, 22C)
+22C = (22Z, 22Z)
+22Z = (22B, 22B)
+XXX = (XXX, XXX)
+Here, there are two starting nodes, 11A and 22A (because they both end with A). As you follow each left/right instruction, use that instruction to simultaneously navigate away from both nodes you're currently on. Repeat this process until all of the nodes you're currently on end with Z. (If only some of the nodes you're on end with Z, they act like any other node and you continue as normal.) In this example, you would proceed as follows:
 
-Your puzzle answer was 250577259.
+Step 0: You are at 11A and 22A.
+Step 1: You choose all of the left paths, leading you to 11B and 22B.
+Step 2: You choose all of the right paths, leading you to 11Z and 22C.
+Step 3: You choose all of the left paths, leading you to 11B and 22Z.
+Step 4: You choose all of the right paths, leading you to 11Z and 22B.
+Step 5: You choose all of the left paths, leading you to 11B and 22C.
+Step 6: You choose all of the right paths, leading you to 11Z and 22Z.
+So, in this example, you end up entirely on nodes that end in Z after 6 steps.
+
+Simultaneously start on every node that ends with A. How many steps does it take before you're only on nodes that end with Z?
+
+Your puzzle answer was 10371555451871.
 
 Both parts of this puzzle are complete! They provide two gold stars: **

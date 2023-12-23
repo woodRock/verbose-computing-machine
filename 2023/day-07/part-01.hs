@@ -14,6 +14,11 @@ parse x = (hand, score)
         [hand, tmp_score] = words x
         score = read tmp_score :: Int
 
+dict :: M.Map Char Int
+dict = M.fromList $ zip ranks(reverse [1 .. length ranks]) 
+    where 
+        ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
+
 getType :: Hand -> Type
 getType hand
     | a == b && b == c && c == d && d == e = 7 -- Five of a kind
@@ -34,10 +39,6 @@ getType hand
 getRank :: Hand -> [Rank]
 getRank hand = card_ranks
     where 
-        ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
-        dict = M.fromList $ 
-            zip ranks
-            (reverse [1 .. length ranks]) 
         card_ranks = map (\card -> fromMaybe 0 (M.lookup card dict)) hand
 
 sortHandsByRank:: [Hand] -> [Hand]
