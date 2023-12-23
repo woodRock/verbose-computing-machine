@@ -20,25 +20,23 @@ parse (x:xs) = (node, (left, right)) : parse  xs
 allEndWithZ :: [Node] -> Bool 
 allEndWithZ a = (==) (length a) . length . filter (\x -> (last x) == 'Z') $ a
 
-solveOne :: Node -> Char -> M.Map Node (Leaf, Leaf) -> Node 
-solveOne node i treeMap  
-    | i == 'L' = left 
-    | otherwise = right
+solve:: Int -> Node -> String -> M.Map Node (Leaf, Leaf) -> Int
+solve count [_,_,'Z'] _ _ = count
+solve count node (i:is) treeMap  
+    | i == 'L' = solve (count + 1) left is treeMap 
+    | otherwise = solve (count + 1) right is treeMap 
     where 
         (left, right) = fromMaybe ("NULL", "NULL") $ M.lookup node treeMap 
 
-solve:: Count -> [Node] -> [Instruction] -> M.Map Node (Leaf, Leaf) -> Count
-solve count nodes (i:is) treeMap
-    | allEndWithZ nodes = count 
-    | otherwise = solve (count + 1) newNodes is treeMap
-    where 
-        newNodes = map (\node -> solveOne node i treeMap) nodes
+lcm' :: [Int] -> Int 
+lcm' [] = 1
+lcm' (x:xs) = lcm x (lcm' xs)
 
 magic:: String -> String
-magic x = show $ solve 0 startingNodes instructions treeMap
+magic x = show $ lcm' $ map (\node -> solve 0 node instructions treeMap) startingNodes 
     where 
         treeMap = M.fromList . parse . drop 2 . lines $ x
-        instructions = concat . take 1000000 . repeat . head . lines $ x 
+        instructions = concat . take 100 . repeat . head . lines $ x 
         startingNodes = fst <$> (filter (\(a,b) -> (last a) == 'A') . M.toList $ treeMap)
 
 main :: IO()
