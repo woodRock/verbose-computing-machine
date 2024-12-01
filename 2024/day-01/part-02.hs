@@ -14,6 +14,7 @@ distance x y = abs (y - x)
 count :: Int -> [Int] -> Int
 count x y = length $ filter (==x) y
 
+-- Similarity score is the number of occurences on rhs multiplied by the number on the lhs.
 similarityScore :: ([Int], [Int]) -> [Int]
 similarityScore (x,y) = zipWith (*) x (map (\i -> count i y) x)
 
