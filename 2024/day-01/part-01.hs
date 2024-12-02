@@ -1,22 +1,14 @@
 import Data.List
 
--- A pair of integers it two integers separated by a space.
+-- Convert a space-separated string into an integer pair
 readPair :: String -> (Int, Int)
-readPair x = (read a, read b)
-    where 
-        (a:b:_) = words x
+readPair = tuple . map read . words
+  where tuple [a,b] = (a,b)
 
--- Sort the two lists
-sortLists :: ([Int], [Int]) -> ([Int], [Int])
-sortLists (x,y) = ((sort x), (sort y))
+-- Calculate total distance between sorted lists
+computeDistance :: ([Int], [Int]) -> Int
+computeDistance = sum . uncurry (zipWith ((abs .) . (-))) . both sort
+  where both f (x,y) = (f x, f y)
 
--- Distance between to integers.
-distance :: Int -> Int -> Int
-distance x y = abs (y - x)
-
--- Take the difference of the two lists.
-diffLists :: ([Int], [Int]) -> [Int]
-diffLists (x,y) = zipWith (distance) x y
-
-main :: IO () 
-main = interact $ show . sum . diffLists . sortLists . unzip . map readPair . lines
+main :: IO ()
+main = interact $ show . computeDistance . unzip . map readPair . lines

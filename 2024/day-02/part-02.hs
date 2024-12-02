@@ -1,24 +1,20 @@
--- Calculate the distance between two numbers.
-distance :: Int -> Int -> Int
-distance x y = abs (y - x)
-
--- Check if they are all increasing or decreasing.
--- Check whether difference is less or equal to 3.
+-- Check if list represents a monotonic sequence with differences ≤ 3.
 solveOne :: [Int] -> Bool
-solveOne x = ((increasing || decreasing) && diff3)
-    where 
-        diff3 = all (<=3) (zipWith (distance) x (tail x))
-        increasing = all (==True) (zipWith (<) x (tail x))
-        decreasing = all (==True) (zipWith (>) x (tail x))
+solveOne xs = (increasing || decreasing) && diffOk
+  where
+    pairs = zip xs (tail xs)
+    diffOk = all (\(x,y) -> abs (y - x) <= 3) pairs
+    increasing = all (\(x,y) -> x < y) pairs
+    decreasing = all (\(x,y) -> x > y) pairs
 
--- All permutations of removing one element from the list.
+-- Generate all subsequences with one element removed.
 removeOne :: [Int] -> [[Int]]
 removeOne [] = []
 removeOne (x:xs) = xs : map (x:) (removeOne xs)
 
--- Check all permutations to see if one is safe. Return the number of safe permutations.
+-- Count sequences that have at least one valid subsequence.
 solve :: [[Int]] -> Int
-solve =  length . filter (==True) . map (any (==True)) . map (map solveOne) . map (removeOne)
+solve = length . filter (any solveOne . removeOne) 
 
-main :: IO () 
-main = interact $ show . solve . map (map read) . map words . lines
+main :: IO ()
+main = interact $ show . solve . map (map read . words) . lines
