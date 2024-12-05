@@ -10,29 +10,21 @@ parsePage :: String -> [Int]
 parsePage = map read . words . map (\c -> if c==',' then ' ' else c)
 
 parseInput :: String -> ([Rule], [Page])
-parseInput s = case span (/="") $ lines s of
-    (rules, _:pages) -> (map parseRule rules, map parsePage pages)
+parseInput = (\(r,_:p) -> (map parseRule r, map parsePage p)) . span (/="") . lines
 
 violatesRule :: Rule -> Page -> Bool
-violatesRule (a,b) page = a `elem` page && b `elem` page && ia > ib
-    where
-        ia = head [i | (i,n) <- zip [0..] page, n == a]
-        ib = head [i | (i,n) <- zip [0..] page, n == b]
-
-isIncorrectlyOrdered :: [Rule] -> Page -> Bool
-isIncorrectlyOrdered rules page = any (`violatesRule` page) rules
+violatesRule (a,b) p = a `elem` p && b `elem` p && idx a p > idx b p
+ where idx n = head . map fst . filter ((==n) . snd) . zip [0..]
 
 createOrdering :: [Rule] -> [Int] -> [Int]
 createOrdering rules = sortBy (\x y -> 
-    if any (\(a,b) -> a==x && b==y) rules then LT
-    else if any (\(a,b) -> a==y && b==x) rules then GT
-    else compare x y)
+   if any ((==) (x,y) . \(a,b) -> (a,b)) rules then LT
+   else if any ((==) (y,x) . \(a,b) -> (a,b)) rules then GT
+   else compare x y)
 
 main :: IO ()
 main = do
-    (rules, pages) <- parseInput <$> getContents
-    let incorrectPages = filter (isIncorrectlyOrdered rules) pages
-        ordered = map (createOrdering rules) incorrectPages
-        middles = map (\p -> p !! (length p `div` 2)) ordered
-    mapM_ print middles
-    print $ sum middles
+   (rules, pages) <- parseInput <$> getContents
+   let result = map (middle . createOrdering rules) $ filter (\p -> any (\r -> r `violatesRule` p) rules) pages
+       middle p = p !! (length p `div` 2)
+   print $ sum result

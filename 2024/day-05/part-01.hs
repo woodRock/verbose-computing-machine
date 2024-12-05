@@ -8,25 +8,15 @@ parsePage :: String -> [Int]
 parsePage = map read . words . map (\c -> if c==',' then ' ' else c)
 
 parseInput :: String -> ([Rule], [Page])
-parseInput s = case span (/="") $ lines s of
-    (rules, _:pages) -> (map parseRule rules, map parsePage pages)
+parseInput = (\(r,_:p) -> (map parseRule r, map parsePage p)) . span (/="") . lines
 
 violatesRule :: Rule -> Page -> Bool
-violatesRule (a,b) page = a `elem` page && b `elem` page && ia > ib
-    where
-        ia = head [i | (i,n) <- zip [0..] page, n == a]
-        ib = head [i | (i,n) <- zip [0..] page, n == b]
-
-violatesAnyRule :: [Rule] -> Page -> Bool
-violatesAnyRule rules page = any (`violatesRule` page) rules
-
-getMiddleNumbers :: [Rule] -> [Page] -> [Int]
-getMiddleNumbers rules = map middle . filter (not . violatesAnyRule rules)
-    where middle page = page !! (length page `div` 2)
+violatesRule (a,b) p = a `elem` p && b `elem` p && idx a p > idx b p
+  where idx n = head . map fst . filter ((==n) . snd) . zip [0..]
 
 main :: IO ()
 main = do
     (rules, pages) <- parseInput <$> getContents
-    let middles = getMiddleNumbers rules pages
-    mapM_ print middles
-    print $ sum middles
+    let result = map (middle) $ filter (\p -> not $ any (\r -> r `violatesRule` p) rules) pages
+        middle p = p !! (length p `div` 2)
+    print $ sum result
