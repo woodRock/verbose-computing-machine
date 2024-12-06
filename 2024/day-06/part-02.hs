@@ -16,44 +16,44 @@ step dir (x, y) maze
             East  -> (x + 1, y)
             South -> (x, y + 1)
             West  -> (x - 1, y)
-        notInBounds dx dy = dx < 0 || dy < 0 || dx >= length (head maze) || dy >= length maze
+        notInBounds dx dy = dx < 0 || dy < 0 || 
+                           dx >= length (head maze) || dy >= length maze
         isObstacle dx dy = maze !! dy !! dx == '#'
 
 rotate :: Direction -> Direction
 rotate North = East
-rotate East  = South
+rotate East = South
 rotate South = West
-rotate West  = North
+rotate West = North
 
-followPath :: Maze -> Bool
-followPath maze = isLoop
+isLoop :: Maze -> Bool
+isLoop maze = length path /= length (Set.fromList path)
     where 
-        start = head [(x, y) | y <- [0..h], x <- [0..w], maze !! y !! x == '^']
-        h = length maze - 1
         w = length (head maze) - 1
-        setVisited = Set.fromList visited
-        visited = filter ((/= (-1, -1)) . snd) $ take 10000 $ iterate (\(d, p) -> step d p maze) (North, start)
-        isLoop = length setVisited /= length visited
+        h = length maze - 1
+        start = head [(x, y) | y <- [0..h], x <- [0..w], maze !! y !! x == '^']
+        path = filter ((/= (-1, -1)) . snd) $ 
+               take 10000 $ 
+               iterate (\(d, p) -> step d p maze) (North, start)
 
-placeObstacle :: [Position] -> Maze -> [Maze]
-placeObstacle pos maze = [placeObstacleAt x y maze | (x,y) <- pos, maze !! y !! x == '.']
-    where 
-        placeObstacleAt x y maze = 
-            let (h1, h2) = splitAt y maze
-                (r1, r2) = splitAt x (head h2)
-            in h1 ++ [r1 ++ '#' : tail r2] ++ tail h2
+addObstacle :: Position -> Maze -> Maze
+addObstacle (x, y) maze = 
+    take y maze ++ 
+    [take x row ++ '#' : drop (x + 1) row] ++ 
+    drop (y + 1) maze
+    where row = maze !! y
 
 solve :: String -> Int
-solve input = length $ filter followPath $ placeObstacle candidatePositions maze
+solve input = length $ filter isLoop $ map (`addObstacle` maze) candidates
     where 
         maze = lines input
-        h = length maze - 1
         w = length (head maze) - 1
+        h = length maze - 1
         start = head [(x, y) | y <- [0..h], x <- [0..w], maze !! y !! x == '^']
-        
-        candidatePositions = Set.toList $ Set.fromList $ map snd $ 
-            takeWhile ((/= (-1, -1)) . snd) $ 
-            iterate (\(d, p) -> step d p maze) (North, start)
+        candidates = filter (\p -> maze !! snd p !! fst p == '.') $
+                    Set.toList $ Set.fromList $ map snd $ 
+                    takeWhile ((/= (-1, -1)) . snd) $ 
+                    iterate (\(d, p) -> step d p maze) (North, start)
 
 main :: IO ()
 main = interact $ show . solve
