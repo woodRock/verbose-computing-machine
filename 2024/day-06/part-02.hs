@@ -1,91 +1,59 @@
 import Data.Set (Set)
 import qualified Data.Set as Set
 
-data Direction = North | East | South | West deriving (Eq, Ord, Show)
-data Position = Position { x :: Int, y :: Int } deriving (Eq, Ord, Show)
-data Guard = Guard { pos :: Position, dir :: Direction } deriving (Show, Eq, Ord)
+data Direction = North | East | South | West deriving (Show, Eq, Ord)
+type Position = (Int, Int)
+type Maze = [String]
 
-turnRight :: Direction -> Direction
-turnRight North = East
-turnRight East = South
-turnRight South = West
-turnRight West = North
+step :: Direction -> Position -> Maze -> (Direction, Position)
+step dir (x, y) maze 
+    | notInBounds x' y' = (dir, (-1, -1))
+    | isObstacle x' y' = (rotate dir, (x, y))
+    | otherwise = (dir, (x', y'))
+    where 
+        (x', y') = case dir of
+            North -> (x, y - 1)
+            East  -> (x + 1, y)
+            South -> (x, y + 1)
+            West  -> (x - 1, y)
+        notInBounds dx dy = dx < 0 || dy < 0 || dx >= length (head maze) || dy >= length maze
+        isObstacle dx dy = maze !! dy !! dx == '#'
 
-forward :: Guard -> Position
-forward (Guard (Position x y) dir) = case dir of
-    North -> Position x (y-1)
-    East  -> Position (x+1) y
-    South -> Position x (y+1)
-    West  -> Position (x-1) y
+rotate :: Direction -> Direction
+rotate North = East
+rotate East  = South
+rotate South = West
+rotate West  = North
 
-inBounds :: Int -> Int -> Position -> Bool
-inBounds width height (Position x y) = 
-    x >= 0 && x < width && y >= 0 && y < height
+followPath :: Maze -> Bool
+followPath maze = isLoop
+    where 
+        start = head [(x, y) | y <- [0..h], x <- [0..w], maze !! y !! x == '^']
+        h = length maze - 1
+        w = length (head maze) - 1
+        setVisited = Set.fromList visited
+        visited = filter ((/= (-1, -1)) . snd) $ take 10000 $ iterate (\(d, p) -> step d p maze) (North, start)
+        isLoop = length setVisited /= length visited
 
-parseGrid :: String -> (Guard, Set Position)
-parseGrid input = (guard, obstacles)
-  where
-    rows = lines input
-    positions = [(x, y, c) | (y, row) <- zip [0..] rows, 
-                            (x, c) <- zip [0..] row]
-    guard = head [Guard (Position x y) North | (x, y, c) <- positions, c == '^']
-    obstacles = Set.fromList [Position x y | (x, y, c) <- positions, c == '#']
+placeObstacle :: [Position] -> Maze -> [Maze]
+placeObstacle pos maze = [placeObstacleAt x y maze | (x,y) <- pos, maze !! y !! x == '.']
+    where 
+        placeObstacleAt x y maze = 
+            let (h1, h2) = splitAt y maze
+                (r1, r2) = splitAt x (head h2)
+            in h1 ++ [r1 ++ '#' : tail r2] ++ tail h2
 
--- Get full path of guard with set of states and obstacles visited
-simulateGuard :: Int -> Int -> Set Position -> Guard -> (Set Guard, Set Position)
-simulateGuard width height obstacles initialGuard = go Set.empty Set.empty initialGuard
-  where
-    go states positions guard
-        | not (inBounds width height nextPos) = (states, positions)
-        | Set.member guard states = (states, positions)
-        | Set.member nextPos obstacles = 
-            go (Set.insert guard states) 
-               (Set.insert nextPos positions)
-               (Guard (pos guard) (turnRight (dir guard)))
-        | otherwise = 
-            go (Set.insert guard states)
-               (Set.insert nextPos positions)
-               (Guard nextPos (dir guard))
-      where
-        nextPos = forward guard
-
--- Check if position creates a loop
-createsLoop :: Int -> Int -> Set Position -> Set Guard -> Guard -> Position -> Bool
-createsLoop width height obstacles originalStates initialGuard testPos = go Set.empty initialGuard
-  where
-    go visited guard
-        | not (inBounds width height nextPos) = False
-        | Set.member guard visited = True
-        | nextPos == testPos || Set.member nextPos obstacles =
-            go (Set.insert guard visited) (Guard (pos guard) (turnRight (dir guard)))
-        | otherwise =
-            go (Set.insert guard visited) (Guard nextPos (dir guard))
-      where
-        nextPos = forward guard
-
-solve2 :: String -> Int
-solve2 input = length loopPositions
-  where
-    rows = lines input
-    width = length (head rows)
-    height = length rows
-    (initialGuard, obstacles) = parseGrid input
-    
-    -- Get original path
-    (originalStates, visitedPositions) = simulateGuard width height obstacles initialGuard
-    startingPos = pos initialGuard
-    
-    -- Get candidate positions
-    candidates = [ nextPos | guard <- Set.toList originalStates
-                         , let nextPos = forward guard
-                         , inBounds width height nextPos
-                         , not (Set.member nextPos obstacles)
-                         , nextPos /= startingPos
-                         ]
-    
-    -- Test each position
-    loopPositions = filter (createsLoop width height obstacles originalStates initialGuard) 
-                    (Set.toList $ Set.fromList candidates)
+solve :: String -> Int
+solve input = length $ filter followPath $ placeObstacle candidatePositions maze
+    where 
+        maze = lines input
+        h = length maze - 1
+        w = length (head maze) - 1
+        start = head [(x, y) | y <- [0..h], x <- [0..w], maze !! y !! x == '^']
+        
+        candidatePositions = Set.toList $ Set.fromList $ map snd $ 
+            takeWhile ((/= (-1, -1)) . snd) $ 
+            iterate (\(d, p) -> step d p maze) (North, start)
 
 main :: IO ()
-main = interact $ show . solve2
+main = interact $ show . solve
