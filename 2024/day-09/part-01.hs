@@ -1,30 +1,45 @@
-import Data.Char (isAlphaNum)
-import qualified Data.Set as Set
+import Data.Char (digitToInt, intToDigit, isDigit)
+import Data.List (elemIndex, findIndex)
+import Data.Maybe (fromMaybe)
 
-type Point = (Int, Int, Char)
+stringToDigits :: String -> [Int]
+stringToDigits = map (\a -> if isDigit a then digitToInt a else 0)
 
-findAntenna :: [String] -> [Point]
-findAntenna grid = [(x, y, c) | 
-    (y, row) <- zip [0..] grid, 
-    (x, c) <- zip [0..] row, 
-    isAlphaNum c]
+-- Add up the result of multiplying each of these blocks' 
+-- position with the file ID number it contains/
+checksum :: String -> Int 
+checksum x = result
+  where 
+    diskMap = stringToDigits x
+    result = sum $ zipWith (*) diskMap [0..]
+    
+expand :: String -> String
+expand x = concatMap expand' idToSpace
+  where 
+    idToSpace = zip [0..] x 
+    expand' (id, c) = if (id + 1) `mod` 2 == 0 
+                      then replicate (digitToInt c) '.' 
+                      else replicate (digitToInt c) (intToDigit (min 9 (id `div` 2)))
+                      
+move :: String -> String 
+move x 
+  | isFull x = x 
+  | otherwise = 
+      case (leftMostSpaceIndex, rightmostDigitIndex) of
+        (Just i, Just j) -> move $ swapChars i (length x - 1 - j) x
+        _ -> x  -- handle case where indices aren't found
+  where 
+    isFull str = 
+        let (nums, dots) = span (/= '.') str
+        in all (== '.') dots
+    rightmostDigitIndex = findIndex isDigit $ reverse x
+    leftMostSpaceIndex = findIndex (== '.') x
+    swapChars i j str = 
+      let ci = str !! i
+          cj = str !! j
+      in replaceAt i cj (replaceAt j ci str)
+    replaceAt n newChar str = take n str ++ newChar : drop (n+1) str
+    
 
-findAntinodes :: [Point] -> [Point]
-findAntinodes antennas = concat
-    [[(x1 + dx, y1 + dy, '#'), (x2 - dx, y2 - dy, '#')] |
-        (x1, y1, c1) <- antennas,
-        (x2, y2, c2) <- antennas,
-        c1 == c2,            -- Check where the antennas are the same.
-        (x1, y1) < (x2, y2), -- Ignore self comparison.
-        let dx = 2*(x2 - x1),
-        let dy = 2*(y2 - y1)]
-
-solve :: [String] -> Int
-solve grid = length $ filter (isInBounds bounds) $ Set.toList $ Set.fromList antinodes
-    where
-        bounds = (length (head grid), length grid)
-        antinodes = findAntinodes $ findAntenna grid
-        isInBounds (w, h) (x, y, _) = x >= 0 && y >= 0 && x < w && y < h
-
-main :: IO ()
-main = interact $ show . solve . lines
+main :: IO () 
+main = interact $ show . checksum . move . expand
