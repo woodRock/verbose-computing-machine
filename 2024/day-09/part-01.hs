@@ -1,45 +1,43 @@
-import Data.Char (digitToInt, intToDigit, isDigit)
+import Data.Char (digitToInt, isDigit)
 import Data.List (elemIndex, findIndex)
 import Data.Maybe (fromMaybe)
 
-stringToDigits :: String -> [Int]
-stringToDigits = map (\a -> if isDigit a then digitToInt a else 0)
+type Block = Either Int Char  -- Left Int for file ID, Right Char for dot
 
--- Add up the result of multiplying each of these blocks' 
--- position with the file ID number it contains/
-checksum :: String -> Int 
-checksum x = result
+expand :: String -> [Block]
+expand x = concatMap expand' idSpacePairs
   where 
-    diskMap = stringToDigits x
-    result = sum $ zipWith (*) diskMap [0..]
-    
-expand :: String -> String
-expand x = concatMap expand' idToSpace
-  where 
-    idToSpace = zip [0..] x 
-    expand' (id, c) = if (id + 1) `mod` 2 == 0 
-                      then replicate (digitToInt c) '.' 
-                      else replicate (digitToInt c) (intToDigit (min 9 (id `div` 2)))
+    idSpacePairs = zip [0..] x 
+    expand' (id, c) = 
+      if (id + 1) `mod` 2 == 0 
+      then replicate (digitToInt c) (Right '.')  -- free space
+      else replicate (digitToInt c) (Left (id `div` 2))  -- file ID
                       
-move :: String -> String 
+move :: [Block] -> [Block]
 move x 
   | isFull x = x 
   | otherwise = 
-      case (leftMostSpaceIndex, rightmostDigitIndex) of
-        (Just i, Just j) -> move $ swapChars i (length x - 1 - j) x
-        _ -> x  -- handle case where indices aren't found
+      case (leftMostSpaceIndex, rightmostFileIndex) of
+        (Just i, Just j) -> move $ swapBlocks i (length x - 1 - j) x
+        _ -> x
   where 
-    isFull str = 
-        let (nums, dots) = span (/= '.') str
-        in all (== '.') dots
-    rightmostDigitIndex = findIndex isDigit $ reverse x
-    leftMostSpaceIndex = findIndex (== '.') x
-    swapChars i j str = 
-      let ci = str !! i
-          cj = str !! j
-      in replaceAt i cj (replaceAt j ci str)
-    replaceAt n newChar str = take n str ++ newChar : drop (n+1) str
-    
+    isFull blocks = 
+        let (files, spaces) = span isFile blocks
+        in all isDot spaces
+    isFile (Left _) = True
+    isFile _ = False
+    isDot (Right '.') = True
+    isDot _ = False
+    rightmostFileIndex = findIndex isFile $ reverse x
+    leftMostSpaceIndex = findIndex isDot x
+    swapBlocks i j blocks = 
+      let ci = blocks !! i
+          cj = blocks !! j
+      in replaceAt i cj (replaceAt j ci blocks)
+    replaceAt n newBlock blocks = take n blocks ++ newBlock : drop (n+1) blocks
+
+checksum :: [Block] -> Int 
+checksum blocks = sum [i * id | (i, Left id) <- zip [0..] blocks]
 
 main :: IO () 
 main = interact $ show . checksum . move . expand
