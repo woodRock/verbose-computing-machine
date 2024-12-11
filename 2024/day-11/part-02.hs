@@ -1,15 +1,38 @@
-rules :: Int -> [Int] 
-rules 0 = [1] -- If the stone is engraved with the number 0, it is replaced by a stone engraved with the number 1.
-rules n -- If the stone is engraved with a number that has an even number of digits, it is replaced by two stones. The left half of the digits are engraved on the new left stone, and the right half of the digits are engraved on the new right stone. (The new numbers don't keep extra leading zeroes: 1000 would become stones 10 and 0.)
-  | even (length $ show n) =
-    let s = show n
-        (l, r) = splitAt (length s `div` 2) s
-     in map read [l, r]
-  | otherwise = [n * 2024] -- If none of the other rules apply, the stone is replaced by a new stone; the old stone's number multiplied by 2024 is engraved on the new stone.  
+{-# LANGUAGE BangPatterns #-}
+import qualified Data.IntMap.Strict as IM
+import Data.List (foldl')
 
-blink :: [Int] -> [Int]
-blink x = concatMap (\n -> rules n) x
+-- Rules carefully matching the specification
+rules :: Int -> [Int]
+rules 0 = [1]  -- Rule 1: If the stone is engraved with the number 0
+rules n = 
+    let s = show n  -- Int already ignores leading zeros
+        digitCount = length s
+    in if even digitCount
+       then  -- Rule 2: Even number of digits
+           let mid = digitCount `div` 2
+               (l, r) = splitAt mid s
+               leftNum = read l :: Int
+               rightNum = read r :: Int
+           in [leftNum, rightNum]
+       else [n * 2024]  -- Rule 3: Multiply by 2024
 
-main :: IO () 
-main = interact $ show . length . last . take n . iterate blink . map read . words
-  where n = 75 + 1
+-- Process one generation using IntMap for efficiency
+blinkOnce :: IM.IntMap Int -> IM.IntMap Int
+blinkOnce freqMap = 
+    IM.foldlWithKey' processStone IM.empty freqMap
+    where
+        processStone !acc !stone !count =
+            let newStones = rules stone
+                addStone m s = IM.insertWith (+) s count m
+            in foldl' addStone acc newStones
+
+-- Main processing function using IntMap
+process :: Int -> [Int] -> Int
+process generations initialStones = 
+    let initialMap = foldl' (\m n -> IM.insertWith (+) n 1 m) IM.empty initialStones
+        finalMap = (!! generations) $ iterate blinkOnce initialMap
+    in sum $ IM.elems finalMap
+
+main :: IO ()
+main = interact $ show . process 75 . map read . words
