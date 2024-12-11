@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 import qualified Data.IntMap.Strict as IM
 import Data.List (foldl')
 
