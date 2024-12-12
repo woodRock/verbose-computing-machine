@@ -98,6 +98,6 @@ solve input =
 
 main :: IO ()
 main = do
-    input <- lines <$> readFile "input.txt"
+    input <- lines <$> getContents
     let (part1, part2) = solve input
     putStrLn $ show part1 ++ " " ++ show part2
