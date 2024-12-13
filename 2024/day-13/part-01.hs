@@ -27,5 +27,5 @@ solve ((ax,ay), (bx,by), (px,py)) limit =
 main :: IO ()
 main = do
     machines <- parseInput <$> getContents
-    let tokens = sum . map (maybe 0 id) $ map (`solve` 10000000000000) machines
+    let tokens = sum . map (maybe 0 id) $ map (`solve` 100) machines
     print tokens
