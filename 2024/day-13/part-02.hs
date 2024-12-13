@@ -4,18 +4,14 @@ type Matrix = [[Int]]
 type Vector = [Int]
 type Machine = ((Int,Int), (Int,Int), (Int,Int))  -- ((ax,ay), (bx,by), (px,py))
 
--- 2x2 matrix determinant
 determinant :: Matrix -> Int
 determinant [[a,b],[c,d]] = a*d - b*c
 
--- 2x2 matrix inverse multiplied by determinant to keep integers
--- Returns (matrix * det, det)
 matrixInverse :: Matrix -> (Matrix, Int)
 matrixInverse [[a,b],[c,d]] = 
     let det = determinant [[a,b],[c,d]]
     in ([[d,-b],[-c,a]], det)
 
--- Matrix-vector multiplication
 matrixVectorMul :: Matrix -> Vector -> Vector
 matrixVectorMul m v = map (sum . zipWith (*) v) m
 
@@ -34,15 +30,11 @@ parseInput = map (maybe (error "bad input") id . parseMachine) .
           f x (y:ys) = (x:y):ys
           f x [] = [[x]]
 
--- Solve using matrix multiplication:
--- [ax bx] [a] = [px]
--- [ay by] [b] = [py]
 solveMatrix :: Machine -> Maybe Int
 solveMatrix ((ax,ay), (bx,by), (px,py)) = 
     let matrix = [[ax,bx],[ay,by]]
         vector = [px,py]
         (inv, det) = matrixInverse matrix
-        -- Solution = inverse * vector / det
         [a,b] = map (`div` det) $ matrixVectorMul inv vector
     in if det == 0 || 
           any ((/= 0) . (`mod` det)) (matrixVectorMul inv vector) ||
