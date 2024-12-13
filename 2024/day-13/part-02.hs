@@ -36,7 +36,7 @@ parseInput = map (maybe (error "bad input") id . parseMachine) .
 
 -- Solve using matrix multiplication:
 -- [ax bx] [a] = [px]
--- [ay by] [b]   [py]
+-- [ay by] [b] = [py]
 solveMatrix :: Machine -> Maybe Int
 solveMatrix ((ax,ay), (bx,by), (px,py)) = 
     let matrix = [[ax,bx],[ay,by]]
