@@ -1,5 +1,3 @@
-module Day15 where
-
 import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
 import Debug.Trace
