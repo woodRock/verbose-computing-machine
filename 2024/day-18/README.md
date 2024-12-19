@@ -1,77 +1,92 @@
---- Day 17: Chronospatial Computer ---
-The Historians push the button on their strange device, but this time, you all just feel like you're falling.
+--- Day 18: RAM Run ---
+You and The Historians look a lot more pixelated than you remember. You're inside a computer at the North Pole!
 
-"Situation critical", the device announces in a familiar voice. "Bootstrapping process failed. Initializing debugger...."
+Just as you're about to check out your surroundings, a program runs up to you. "This region of memory isn't safe! The User misunderstood what a pushdown automaton is and their algorithm is pushing whole bytes down on top of us! Run!"
 
-The small handheld device suddenly unfolds into an entire computer! The Historians look around nervously before one of them tosses it to you.
+The algorithm is fast - it's going to cause a byte to fall into your memory space once every nanosecond! Fortunately, you're faster, and by quickly scanning the algorithm, you create a list of which bytes will fall (your puzzle input) in the order they'll land in your memory space.
 
-This seems to be a 3-bit computer: its program is a list of 3-bit numbers (0 through 7), like 0,1,2,3. The computer also has three registers named A, B, and C, but these registers aren't limited to 3 bits and can instead hold any integer.
+Your memory space is a two-dimensional grid with coordinates that range from 0 to 70 both horizontally and vertically. However, for the sake of example, suppose you're on a smaller grid with coordinates that range from 0 to 6 and the following list of incoming byte positions:
 
-The computer knows eight instructions, each identified by a 3-bit number (called the instruction's opcode). Each instruction also reads the 3-bit number after it as an input; this is called its operand.
+5,4
+4,2
+4,5
+3,0
+2,1
+6,3
+2,4
+1,5
+0,6
+3,3
+2,6
+5,1
+1,2
+5,5
+2,5
+6,5
+1,4
+0,4
+6,4
+1,1
+6,1
+1,0
+0,5
+1,6
+2,0
+Each byte position is given as an X,Y coordinate, where X is the distance from the left edge of your memory space and Y is the distance from the top edge of your memory space.
 
-A number called the instruction pointer identifies the position in the program from which the next opcode will be read; it starts at 0, pointing at the first 3-bit number in the program. Except for jump instructions, the instruction pointer increases by 2 after each instruction is processed (to move past the instruction's opcode and its operand). If the computer tries to read an opcode past the end of the program, it instead halts.
+You and The Historians are currently in the top left corner of the memory space (at 0,0) and need to reach the exit in the bottom right corner (at 70,70 in your memory space, but at 6,6 in this example). You'll need to simulate the falling bytes to plan out where it will be safe to run; for now, simulate just the first few bytes falling into your memory space.
 
-So, the program 0,1,2,3 would run the instruction whose opcode is 0 and pass it the operand 1, then run the instruction having opcode 2 and pass it the operand 3, then halt.
+As bytes fall into your memory space, they make that coordinate corrupted. Corrupted memory coordinates cannot be entered by you or The Historians, so you'll need to plan your route carefully. You also cannot leave the boundaries of the memory space; your only hope is to reach the exit.
 
-There are two types of operands; each instruction specifies the type of its operand. The value of a literal operand is the operand itself. For example, the value of the literal operand 7 is the number 7. The value of a combo operand can be found as follows:
+In the above example, if you were to draw the memory space after the first 12 bytes have fallen (using . for safe and # for corrupted), it would look like this:
 
-Combo operands 0 through 3 represent literal values 0 through 3.
-Combo operand 4 represents the value of register A.
-Combo operand 5 represents the value of register B.
-Combo operand 6 represents the value of register C.
-Combo operand 7 is reserved and will not appear in valid programs.
-The eight instructions are as follows:
+...#...
+..#..#.
+....#..
+...#..#
+..#..#.
+.#..#..
+#.#....
+You can take steps up, down, left, or right. After just 12 bytes have corrupted locations in your memory space, the shortest path from the top left corner to the exit would take 22 steps. Here (marked with O) is one such path:
 
-The adv instruction (opcode 0) performs division. The numerator is the value in the A register. The denominator is found by raising 2 to the power of the instruction's combo operand. (So, an operand of 2 would divide A by 4 (2^2); an operand of 5 would divide A by 2^B.) The result of the division operation is truncated to an integer and then written to the A register.
+OO.#OOO
+.O#OO#O
+.OOO#OO
+...#OO#
+..#OO#.
+.#.O#..
+#.#OOOO
+Simulate the first kilobyte (1024 bytes) falling onto your memory space. Afterward, what is the minimum number of steps needed to reach the exit?
 
-The bxl instruction (opcode 1) calculates the bitwise XOR of register B and the instruction's literal operand, then stores the result in register B.
-
-The bst instruction (opcode 2) calculates the value of its combo operand modulo 8 (thereby keeping only its lowest 3 bits), then writes that value to the B register.
-
-The jnz instruction (opcode 3) does nothing if the A register is 0. However, if the A register is not zero, it jumps by setting the instruction pointer to the value of its literal operand; if this instruction jumps, the instruction pointer is not increased by 2 after this instruction.
-
-The bxc instruction (opcode 4) calculates the bitwise XOR of register B and register C, then stores the result in register B. (For legacy reasons, this instruction reads an operand but ignores it.)
-
-The out instruction (opcode 5) calculates the value of its combo operand modulo 8, then outputs that value. (If a program outputs multiple values, they are separated by commas.)
-
-The bdv instruction (opcode 6) works exactly like the adv instruction except that the result is stored in the B register. (The numerator is still read from the A register.)
-
-The cdv instruction (opcode 7) works exactly like the adv instruction except that the result is stored in the C register. (The numerator is still read from the A register.)
-
-Here are some examples of instruction operation:
-
-If register C contains 9, the program 2,6 would set register B to 1.
-If register A contains 10, the program 5,0,5,1,5,4 would output 0,1,2.
-If register A contains 2024, the program 0,1,5,4,3,0 would output 4,2,5,6,7,7,7,7,3,1,0 and leave 0 in register A.
-If register B contains 29, the program 1,7 would set register B to 26.
-If register B contains 2024 and register C contains 43690, the program 4,0 would set register B to 44354.
-The Historians' strange device has finished initializing its debugger and is displaying some information about the program it is trying to run (your puzzle input). For example:
-
-Register A: 729
-Register B: 0
-Register C: 0
-
-Program: 0,1,5,4,3,0
-Your first task is to determine what the program is trying to output. To do this, initialize the registers to the given values, then run the given program, collecting any output produced by out instructions. (Always join the values produced by out instructions with commas.) After the above program halts, its final output will be 4,6,3,5,6,3,5,2,1,0.
-
-Using the information provided by the debugger, initialize the registers to the given values, then run the program. Once it halts, what do you get if you use commas to join the values it output into a single string?
-
-Your puzzle answer was 2,0,1,3,4,0,2,1,7.
+Your puzzle answer was 262.
 
 --- Part Two ---
-Digging deeper in the device's manual, you discover the problem: this program is supposed to output another copy of the program! Unfortunately, the value in register A seems to have been corrupted. You'll need to find a new value to which you can initialize register A so that the program's output instructions produce an exact copy of the program itself.
+The Historians aren't as used to moving around in this pixelated universe as you are. You're afraid they're not going to be fast enough to make it to the exit before the path is completely blocked.
 
-For example:
+To determine how fast everyone needs to go, you need to determine the first byte that will cut off the path to the exit.
 
-Register A: 2024
-Register B: 0
-Register C: 0
+In the above example, after the byte at 1,1 falls, there is still a path to the exit:
 
-Program: 0,3,5,4,3,0
-This program outputs a copy of itself if register A is instead initialized to 117440. (The original initial value of register A, 2024, is ignored.)
+O..#OOO
+O##OO#O
+O#OO#OO
+OOO#OO#
+###OO##
+.##O###
+#.#OOOO
+However, after adding the very next byte (at 6,1), there is no longer a path to the exit:
 
-What is the lowest positive initial value for register A that causes the program to output a copy of itself?
+...#...
+.##..##
+.#..#..
+...#..#
+###..##
+.##.###
+#.#....
+So, in this example, the coordinates of the first byte that prevents the exit from being reachable are 6,1.
 
-Your puzzle answer was 236580836040301.
+Simulate more of the bytes that are about to corrupt your memory space. What are the coordinates of the first byte that will prevent the exit from being reachable from your starting position? (Provide the answer as two integers separated by a comma with no other characters.)
+
+Your puzzle answer was 22,20.
 
 Both parts of this puzzle are complete! They provide two gold stars: **
